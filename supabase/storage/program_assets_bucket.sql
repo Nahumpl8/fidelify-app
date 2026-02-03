@@ -22,48 +22,57 @@ ON CONFLICT (id) DO UPDATE SET
 -- Storage Policies
 -- =========================================
 
--- Policy: Allow authenticated users to upload files to their org folder
-CREATE POLICY "Users can upload to their organization folder"
+-- Drop existing policies if any
+DROP POLICY IF EXISTS "Users can upload to their business folder" ON storage.objects;
+DROP POLICY IF EXISTS "Users can update their business files" ON storage.objects;
+DROP POLICY IF EXISTS "Users can delete their business files" ON storage.objects;
+DROP POLICY IF EXISTS "Public read access for program assets" ON storage.objects;
+DROP POLICY IF EXISTS "Users can upload to their organization folder" ON storage.objects;
+DROP POLICY IF EXISTS "Users can update their organization files" ON storage.objects;
+DROP POLICY IF EXISTS "Users can delete their organization files" ON storage.objects;
+
+-- Policy: Allow authenticated users to upload files to their business folder
+-- Users can upload if they are owner or active employee of the business
+CREATE POLICY "Users can upload to their business folder"
 ON storage.objects FOR INSERT
 TO authenticated
 WITH CHECK (
   bucket_id = 'program-assets' AND
   (storage.foldername(name))[1] IN (
-    SELECT id::text FROM organizations
-    WHERE id IN (
-      SELECT organization_id FROM organization_members
-      WHERE user_id = auth.uid()
-    )
+    -- Business owner
+    SELECT id::text FROM businesses WHERE owner_user_id = auth.uid()
+    UNION
+    -- Active employees
+    SELECT business_id::text FROM employees
+    WHERE auth_user_id = auth.uid() AND is_active = true
   )
 );
 
--- Policy: Allow authenticated users to update their org files
-CREATE POLICY "Users can update their organization files"
+-- Policy: Allow authenticated users to update their business files
+CREATE POLICY "Users can update their business files"
 ON storage.objects FOR UPDATE
 TO authenticated
 USING (
   bucket_id = 'program-assets' AND
   (storage.foldername(name))[1] IN (
-    SELECT id::text FROM organizations
-    WHERE id IN (
-      SELECT organization_id FROM organization_members
-      WHERE user_id = auth.uid()
-    )
+    SELECT id::text FROM businesses WHERE owner_user_id = auth.uid()
+    UNION
+    SELECT business_id::text FROM employees
+    WHERE auth_user_id = auth.uid() AND is_active = true
   )
 );
 
--- Policy: Allow authenticated users to delete their org files
-CREATE POLICY "Users can delete their organization files"
+-- Policy: Allow authenticated users to delete their business files
+CREATE POLICY "Users can delete their business files"
 ON storage.objects FOR DELETE
 TO authenticated
 USING (
   bucket_id = 'program-assets' AND
   (storage.foldername(name))[1] IN (
-    SELECT id::text FROM organizations
-    WHERE id IN (
-      SELECT organization_id FROM organization_members
-      WHERE user_id = auth.uid()
-    )
+    SELECT id::text FROM businesses WHERE owner_user_id = auth.uid()
+    UNION
+    SELECT business_id::text FROM employees
+    WHERE auth_user_id = auth.uid() AND is_active = true
   )
 );
 
@@ -72,27 +81,3 @@ CREATE POLICY "Public read access for program assets"
 ON storage.objects FOR SELECT
 TO public
 USING (bucket_id = 'program-assets');
-
--- =========================================
--- Alternative: Simple policies (if org setup is not ready)
--- =========================================
--- Uncomment these if you want simpler policies during development
-
--- DROP POLICY IF EXISTS "Users can upload to their organization folder" ON storage.objects;
--- DROP POLICY IF EXISTS "Users can update their organization files" ON storage.objects;
--- DROP POLICY IF EXISTS "Users can delete their organization files" ON storage.objects;
-
--- CREATE POLICY "Authenticated users can upload"
--- ON storage.objects FOR INSERT
--- TO authenticated
--- WITH CHECK (bucket_id = 'program-assets');
-
--- CREATE POLICY "Authenticated users can update"
--- ON storage.objects FOR UPDATE
--- TO authenticated
--- USING (bucket_id = 'program-assets');
-
--- CREATE POLICY "Authenticated users can delete"
--- ON storage.objects FOR DELETE
--- TO authenticated
--- USING (bucket_id = 'program-assets');

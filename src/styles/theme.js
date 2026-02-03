@@ -1,42 +1,47 @@
 /**
  * Fidelify Design System - Theme Configuration
  *
- * Sistema de temas completo con soporte para Light/Dark mode
- * Paleta: Slate + Indigo (SaaS Premium Style)
+ * Sistema de temas con estilo Glassmorphism Premium
+ * Paleta: Violet + Deep Purple (Modern Glass Style)
+ *
+ * Colores base:
+ * - #EAEFFE - Azul lavanda claro (superficies, fondos light)
+ * - #9787F3 - Violeta vibrante (color primario)
+ * - #2D274B - Azul oscuro profundo (textos, fondos dark)
  */
 
 // ============================================
-// COLOR PALETTE - SLATE & INDIGO
+// COLOR PALETTE - VIOLET & DEEP PURPLE
 // ============================================
 const palette = {
-  // Slate - Neutrals with blue undertone
-  slate: {
-    50: '#F8FAFC',
-    100: '#F1F5F9',
-    200: '#E2E8F0',
-    300: '#CBD5E1',
-    400: '#94A3B8',
-    500: '#64748B',
-    600: '#475569',
-    700: '#334155',
-    800: '#1E293B',
-    900: '#0F172A',
-    950: '#020617',
+  // Deep Purple - Neutrals with violet undertone
+  deep: {
+    50: '#EAEFFE',   // Tu color claro
+    100: '#E0E5FF',
+    200: '#C7CFFE',
+    300: '#AEB8FC',
+    400: '#9787F3',   // Tu color primario
+    500: '#7C6AE8',
+    600: '#6554D4',
+    700: '#4E40B8',
+    800: '#3A3190',
+    900: '#2D274B',   // Tu color oscuro
+    950: '#1A1730',
   },
-  // Indigo - Primary accent
-  indigo: {
-    50: '#EEF2FF',
-    100: '#E0E7FF',
-    200: '#C7D2FE',
-    300: '#A5B4FC',
-    400: '#818CF8',
-    500: '#6366F1',
-    600: '#4F46E5',
-    700: '#4338CA',
-    800: '#3730A3',
-    900: '#030304',
+  // Violet - Primary accent (derivados de tu #9787F3)
+  violet: {
+    50: '#F5F3FF',
+    100: '#EDE9FE',
+    200: '#DDD6FE',
+    300: '#C4B5FD',
+    400: '#A78BFA',
+    500: '#9787F3',   // Tu color primario exacto
+    600: '#7C3AED',
+    700: '#6D28D9',
+    800: '#5B21B6',
+    900: '#4C1D95',
   },
-  // Semantic colors
+  // Semantic colors (ajustados para armonizar)
   emerald: {
     400: '#34D399',
     500: '#10B981',
@@ -170,70 +175,73 @@ const shared = {
 };
 
 // ============================================
-// LIGHT THEME - MODERN GLASSMORPHISM
+// LIGHT THEME - PREMIUM GLASSMORPHISM
 // ============================================
 export const lightTheme = {
   ...shared,
   mode: 'light',
 
   colors: {
-    // Primary brand - Emerald (consistent with dark mode)
-    primary: '#10B981',
-    primaryHover: '#059669',
-    primaryLight: 'rgba(16, 185, 129, 0.12)',
-    primaryMuted: 'rgba(16, 185, 129, 0.08)',
+    // Primary brand - Violet (#9787F3)
+    primary: '#9787F3',
+    primaryHover: '#7C6AE8',
+    primaryLight: 'rgba(151, 135, 243, 0.15)',
+    primaryMuted: 'rgba(151, 135, 243, 0.08)',
 
-    // Accent (CTA, success actions)
-    accent: '#10B981',
-    accentHover: '#059669',
-    accentLight: 'rgba(16, 185, 129, 0.1)',
+    // Secondary - Deep Purple
+    secondary: '#2D274B',
 
-    // Backgrounds - Gradient base for glassmorphism
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
-    backgroundSolid: '#F8FAFC',
-    backgroundAlt: 'rgba(255, 255, 255, 0.7)',
-    surface: 'rgba(255, 255, 255, 0.8)',
-    surfaceHover: 'rgba(255, 255, 255, 0.9)',
+    // Accent (CTA, highlights)
+    accent: '#9787F3',
+    accentHover: '#A78BFA',
+    accentLight: 'rgba(151, 135, 243, 0.12)',
+
+    // Backgrounds - Soft lavender gradient for glassmorphism
+    background: 'linear-gradient(145deg, #EAEFFE 0%, #E0E5FF 50%, #F5F3FF 100%)',
+    backgroundSolid: '#EAEFFE',
+    backgroundAlt: 'rgba(234, 239, 254, 0.9)',
+    surface: 'rgba(255, 255, 255, 0.75)',
+    surfaceHover: 'rgba(255, 255, 255, 0.85)',
     surfaceActive: 'rgba(255, 255, 255, 0.95)',
 
-    // Cards with "Slot vs Active" logic
-    cardInactive: 'rgba(255, 255, 255, 0.4)',
+    // Cards with Glass effect
+    cardInactive: 'rgba(255, 255, 255, 0.5)',
     cardActive: 'rgba(255, 255, 255, 0.8)',
     cardActiveHover: 'rgba(255, 255, 255, 0.9)',
 
-    // Text - High contrast
+    // Text - Deep purple tones
     text: {
-      primary: '#1E293B',
-      secondary: '#475569',
-      muted: '#64748B',
+      primary: '#2D274B',
+      secondary: '#4E40B8',
+      muted: '#6554D4',
       inverse: '#FFFFFF',
       onPrimary: '#FFFFFF',
     },
 
-    // Borders - Glass effect
-    border: 'rgba(0, 0, 0, 0.1)',
-    borderLight: 'rgba(0, 0, 0, 0.05)',
-    borderFocus: '#10B981',
+    // Borders - Subtle glass effect
+    border: 'rgba(151, 135, 243, 0.2)',
+    borderLight: 'rgba(151, 135, 243, 0.1)',
+    borderFocus: '#9787F3',
 
     // Input fields - Glass effect
     input: {
-      bg: 'rgba(255, 255, 255, 0.6)',
-      border: 'rgba(0, 0, 0, 0.1)',
-      borderFocus: '#10B981',
-      placeholder: '#94A3B8',
+      bg: 'rgba(255, 255, 255, 0.7)',
+      border: 'rgba(151, 135, 243, 0.2)',
+      borderFocus: '#9787F3',
+      placeholder: '#6554D4',
     },
 
     // Glass utilities for components
     glass: {
-      bg: 'rgba(255, 255, 255, 0.7)',
-      bgHover: 'rgba(255, 255, 255, 0.85)',
-      bgSubtle: 'rgba(255, 255, 255, 0.5)',
-      bgDark: 'rgba(0, 0, 0, 0.05)',
-      border: 'rgba(0, 0, 0, 0.08)',
-      borderHover: 'rgba(0, 0, 0, 0.15)',
-      text: '#1E293B',
-      textSecondary: '#475569',
-      textMuted: '#64748B',
+      bg: 'rgba(255, 255, 255, 0.65)',
+      bgHover: 'rgba(255, 255, 255, 0.8)',
+      bgSubtle: 'rgba(255, 255, 255, 0.4)',
+      bgDark: 'rgba(45, 39, 75, 0.05)',
+      border: 'rgba(151, 135, 243, 0.15)',
+      borderHover: 'rgba(151, 135, 243, 0.3)',
+      text: '#2D274B',
+      textSecondary: '#4E40B8',
+      textMuted: '#6554D4',
     },
 
     // Semantic states
@@ -243,112 +251,115 @@ export const lightTheme = {
     warningLight: 'rgba(245, 158, 11, 0.15)',
     error: '#EF4444',
     errorLight: 'rgba(239, 68, 68, 0.15)',
-    info: '#3B82F6',
-    infoLight: 'rgba(59, 130, 246, 0.15)',
+    info: '#9787F3',
+    infoLight: 'rgba(151, 135, 243, 0.15)',
 
     // Overlays
-    overlay: 'rgba(0, 0, 0, 0.4)',
-    backdrop: 'rgba(255, 255, 255, 0.8)',
+    overlay: 'rgba(45, 39, 75, 0.4)',
+    backdrop: 'rgba(234, 239, 254, 0.9)',
   },
 
   shadows: {
-    xs: '0 1px 2px rgba(0, 0, 0, 0.05)',
-    sm: '0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04)',
-    md: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-    lg: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-    xl: '0 20px 25px -5px rgba(0, 0, 0, 0.12), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-    // Glass card shadows
-    card: '0 8px 32px rgba(0, 0, 0, 0.1)',
-    cardHover: '0 12px 40px rgba(0, 0, 0, 0.15)',
-    // Focus ring
-    focus: '0 0 0 4px rgba(16, 185, 129, 0.25)',
-    // Glass glow
-    glow: '0 0 20px rgba(16, 185, 129, 0.3)',
+    xs: '0 1px 2px rgba(45, 39, 75, 0.05)',
+    sm: '0 1px 3px rgba(45, 39, 75, 0.08), 0 1px 2px rgba(45, 39, 75, 0.04)',
+    md: '0 4px 6px -1px rgba(45, 39, 75, 0.1), 0 2px 4px -1px rgba(45, 39, 75, 0.06)',
+    lg: '0 10px 15px -3px rgba(45, 39, 75, 0.1), 0 4px 6px -2px rgba(45, 39, 75, 0.05)',
+    xl: '0 20px 25px -5px rgba(45, 39, 75, 0.12), 0 10px 10px -5px rgba(45, 39, 75, 0.04)',
+    // Glass card shadows with violet tint
+    card: '0 8px 32px rgba(151, 135, 243, 0.12)',
+    cardHover: '0 16px 48px rgba(151, 135, 243, 0.18)',
+    // Focus ring - Violet
+    focus: '0 0 0 4px rgba(151, 135, 243, 0.3)',
+    // Glass glow - Violet
+    glow: '0 0 24px rgba(151, 135, 243, 0.35)',
     // Inner shadow
-    inset: 'inset 0 2px 4px rgba(0, 0, 0, 0.06)',
+    inset: 'inset 0 2px 4px rgba(45, 39, 75, 0.06)',
   },
 };
 
 // ============================================
-// DARK THEME - MODERN GLASSMORPHISM
+// DARK THEME - PREMIUM GLASSMORPHISM
 // ============================================
 export const darkTheme = {
   ...shared,
   mode: 'dark',
 
   colors: {
-    // Primary brand - EMERALD for dark mode (Bright for visibility)
-    primary: '#10B981',               // Emerald 500 - Main brand
-    primaryHover: '#34D399',          // Emerald 400 - Brighter on hover
-    primaryLight: 'rgba(16, 185, 129, 0.15)',
-    primaryMuted: 'rgba(16, 185, 129, 0.08)',
+    // Primary brand - Bright Violet for dark mode
+    primary: '#A78BFA',               // Brighter violet for visibility
+    primaryHover: '#C4B5FD',          // Even brighter on hover
+    primaryLight: 'rgba(167, 139, 250, 0.2)',
+    primaryMuted: 'rgba(167, 139, 250, 0.1)',
 
-    // Accent - HIGH VISIBILITY green
-    accent: '#34D399',                // Emerald 400
-    accentHover: '#6EE7B7',           // Emerald 300
-    accentLight: 'rgba(52, 211, 153, 0.2)',
+    // Secondary - Deep Purple
+    secondary: '#9787F3',
 
-    // Backgrounds - Dark gradient for glassmorphism
-    background: 'linear-gradient(135deg, #0F172A 0%, #1E1B4B 50%, #172554 100%)',
-    backgroundSolid: '#020617',
-    backgroundAlt: 'rgba(0, 0, 0, 0.2)',
-    surface: 'rgba(30, 41, 59, 0.8)',
-    surfaceHover: 'rgba(51, 65, 85, 0.8)',
-    surfaceActive: 'rgba(51, 65, 85, 0.9)',
+    // Accent - HIGH VISIBILITY violet
+    accent: '#C4B5FD',
+    accentHover: '#DDD6FE',
+    accentLight: 'rgba(196, 181, 253, 0.2)',
 
-    // Cards with "Slot vs Active" logic
-    cardInactive: 'rgba(15, 23, 42, 0.6)',
-    cardActive: 'rgba(30, 41, 59, 0.8)',
-    cardActiveHover: 'rgba(51, 65, 85, 0.8)',
+    // Backgrounds - Deep purple gradient for glassmorphism
+    background: 'linear-gradient(145deg, #1A1730 0%, #2D274B 50%, #3A3190 100%)',
+    backgroundSolid: '#1A1730',
+    backgroundAlt: 'rgba(26, 23, 48, 0.9)',
+    surface: 'rgba(45, 39, 75, 0.7)',
+    surfaceHover: 'rgba(58, 49, 144, 0.6)',
+    surfaceActive: 'rgba(58, 49, 144, 0.8)',
 
-    // Text - MAXIMUM CONTRAST
+    // Cards with Glass effect
+    cardInactive: 'rgba(26, 23, 48, 0.7)',
+    cardActive: 'rgba(45, 39, 75, 0.8)',
+    cardActiveHover: 'rgba(58, 49, 144, 0.7)',
+
+    // Text - High contrast on dark
     text: {
-      primary: '#F1F5F9',             // Slate 100 - Almost white
-      secondary: '#94A3B8',           // Slate 400 - Readable secondary
-      muted: '#64748B',               // Slate 500 - Subtle
-      inverse: '#020617',             // For light backgrounds
+      primary: '#EAEFFE',             // Tu color claro
+      secondary: '#C4B5FD',           // Violet claro
+      muted: '#9787F3',               // Tu color primario como muted
+      inverse: '#1A1730',             // Para fondos claros
       onPrimary: '#FFFFFF',
     },
 
-    // Borders - Glass effect
-    border: 'rgba(255, 255, 255, 0.1)',
-    borderLight: 'rgba(255, 255, 255, 0.05)',
-    borderFocus: '#10B981',
+    // Borders - Glass effect with violet tint
+    border: 'rgba(151, 135, 243, 0.2)',
+    borderLight: 'rgba(151, 135, 243, 0.1)',
+    borderFocus: '#A78BFA',
 
     // Input fields - Glass effect
     input: {
-      bg: 'rgba(0, 0, 0, 0.3)',
-      border: 'rgba(255, 255, 255, 0.1)',
-      borderFocus: '#10B981',
-      placeholder: '#64748B',
+      bg: 'rgba(26, 23, 48, 0.6)',
+      border: 'rgba(151, 135, 243, 0.2)',
+      borderFocus: '#A78BFA',
+      placeholder: '#9787F3',
     },
 
     // Glass utilities for components
     glass: {
-      bg: 'rgba(0, 0, 0, 0.2)',
-      bgHover: 'rgba(0, 0, 0, 0.3)',
-      bgSubtle: 'rgba(255, 255, 255, 0.03)',
-      bgDark: 'rgba(0, 0, 0, 0.4)',
-      border: 'rgba(255, 255, 255, 0.08)',
-      borderHover: 'rgba(255, 255, 255, 0.15)',
-      text: '#F1F5F9',
-      textSecondary: '#94A3B8',
-      textMuted: '#64748B',
+      bg: 'rgba(45, 39, 75, 0.5)',
+      bgHover: 'rgba(58, 49, 144, 0.5)',
+      bgSubtle: 'rgba(151, 135, 243, 0.08)',
+      bgDark: 'rgba(26, 23, 48, 0.8)',
+      border: 'rgba(151, 135, 243, 0.15)',
+      borderHover: 'rgba(151, 135, 243, 0.25)',
+      text: '#EAEFFE',
+      textSecondary: '#C4B5FD',
+      textMuted: '#9787F3',
     },
 
-    // Semantic states - BRIGHTER for dark mode
-    success: '#34D399',               // Emerald 400
-    successLight: 'rgba(52, 211, 153, 0.15)',
-    warning: '#FBBF24',               // Amber 400
-    warningLight: 'rgba(251, 191, 36, 0.15)',
-    error: '#F87171',                 // Red 400
-    errorLight: 'rgba(248, 113, 113, 0.15)',
-    info: '#60A5FA',                  // Blue 400
-    infoLight: 'rgba(96, 165, 250, 0.15)',
+    // Semantic states - Bright for dark mode
+    success: '#34D399',
+    successLight: 'rgba(52, 211, 153, 0.2)',
+    warning: '#FBBF24',
+    warningLight: 'rgba(251, 191, 36, 0.2)',
+    error: '#F87171',
+    errorLight: 'rgba(248, 113, 113, 0.2)',
+    info: '#A78BFA',
+    infoLight: 'rgba(167, 139, 250, 0.2)',
 
     // Overlays
-    overlay: 'rgba(0, 0, 0, 0.8)',
-    backdrop: 'rgba(2, 6, 23, 0.95)',
+    overlay: 'rgba(26, 23, 48, 0.85)',
+    backdrop: 'rgba(26, 23, 48, 0.95)',
   },
 
   shadows: {
@@ -357,13 +368,13 @@ export const darkTheme = {
     md: '0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3)',
     lg: '0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3)',
     xl: '0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 10px 10px -5px rgba(0, 0, 0, 0.4)',
-    // Glass card shadows with glow
-    card: '0 8px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05)',
-    cardHover: '0 12px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1)',
-    // Focus ring - Emerald glow
-    focus: '0 0 0 4px rgba(16, 185, 129, 0.3)',
-    // Glow effect
-    glow: '0 0 20px rgba(16, 185, 129, 0.4)',
+    // Glass card shadows with violet glow
+    card: '0 8px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(151, 135, 243, 0.1)',
+    cardHover: '0 16px 48px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(151, 135, 243, 0.2)',
+    // Focus ring - Violet glow
+    focus: '0 0 0 4px rgba(167, 139, 250, 0.35)',
+    // Glow effect - Violet
+    glow: '0 0 24px rgba(167, 139, 250, 0.4)',
     // Inner shadow
     inset: 'inset 0 2px 4px rgba(0, 0, 0, 0.4)',
   },

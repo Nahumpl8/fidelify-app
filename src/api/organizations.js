@@ -1,42 +1,60 @@
-import { supabase } from './supabaseClient';
+import { supabase } from '../lib/supabase';
 
 /**
- * Obtener la organización del usuario actual
+ * Obtener el negocio del usuario actual
  */
 export const getOrganization = async () => {
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) return { data: null, error: 'No user logged in' };
 
-  // Obtener profile para saber el organization_id
-  const { data: profile, error: profileError } = await supabase
-    .from('profiles')
-    .select('organization_id')
-    .eq('id', user.id)
-    .single();
-
-  if (profileError) return { data: null, error: profileError };
-
-  // Obtener organización
-  const { data, error } = await supabase
-    .from('organizations')
+  // Primero intentar como owner
+  let { data: business, error: ownerError } = await supabase
+    .from('businesses')
     .select('*')
-    .eq('id', profile.organization_id)
+    .eq('owner_user_id', user.id)
     .single();
 
-  return { data, error };
+  // Si no es owner, buscar como employee
+  if (ownerError || !business) {
+    const { data: employee, error: empError } = await supabase
+      .from('employees')
+      .select('business_id')
+      .eq('auth_user_id', user.id)
+      .eq('is_active', true)
+      .single();
+
+    if (empError || !employee) {
+      return { data: null, error: 'No business found for user' };
+    }
+
+    const { data: empBusiness, error: bizError } = await supabase
+      .from('businesses')
+      .select('*')
+      .eq('id', employee.business_id)
+      .single();
+
+    if (bizError) return { data: null, error: bizError };
+    business = empBusiness;
+  }
+
+  return { data: business, error: null };
 };
 
 /**
- * Actualizar la organización
+ * Actualizar el negocio
  */
-export const updateOrganization = async (organizationId, updates) => {
+export const updateOrganization = async (businessId, updates) => {
   const { data, error } = await supabase
-    .from('organizations')
+    .from('businesses')
     .update(updates)
-    .eq('id', organizationId)
+    .eq('id', businessId)
     .select()
     .single();
 
   return { data, error };
 };
+
+// Alias para claridad
+export const getBusiness = getOrganization;
+export const updateBusiness = updateOrganization;

@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { supabase } from '../api/supabaseClient';
+import { supabase } from '../lib/supabase';
 
 const OrganizationContext = createContext(null);
 
@@ -8,38 +8,47 @@ export const OrganizationProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch de la organización del usuario autenticado
+  // Fetch del negocio del usuario autenticado
   const fetchOrganization = async (userId) => {
     try {
       setLoading(true);
       setError(null);
 
-      // Primero obtenemos el profile para saber la organization_id
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('organization_id')
-        .eq('id', userId)
+      // Buscar el negocio donde el usuario es owner o employee
+      // Primero intentamos como owner
+      let { data: business, error: ownerError } = await supabase
+        .from('businesses')
+        .select('*')
+        .eq('owner_user_id', userId)
         .single();
 
-      if (profileError) throw profileError;
+      // Si no es owner, buscar como employee
+      if (ownerError || !business) {
+        const { data: employee, error: empError } = await supabase
+          .from('employees')
+          .select('business_id')
+          .eq('auth_user_id', userId)
+          .eq('is_active', true)
+          .single();
 
-      if (!profile?.organization_id) {
-        setOrganization(null);
-        return;
+        if (empError || !employee) {
+          setOrganization(null);
+          return;
+        }
+
+        const { data: empBusiness, error: bizError } = await supabase
+          .from('businesses')
+          .select('*')
+          .eq('id', employee.business_id)
+          .single();
+
+        if (bizError) throw bizError;
+        business = empBusiness;
       }
 
-      // Luego obtenemos los datos completos de la organización
-      const { data: org, error: orgError } = await supabase
-        .from('organizations')
-        .select('*')
-        .eq('id', profile.organization_id)
-        .single();
-
-      if (orgError) throw orgError;
-
-      setOrganization(org);
+      setOrganization(business);
     } catch (err) {
-      console.error('Error fetching organization:', err);
+      console.error('Error fetching business:', err);
       setError(err.message);
       setOrganization(null);
     } finally {
@@ -47,13 +56,13 @@ export const OrganizationProvider = ({ children }) => {
     }
   };
 
-  // Actualizar datos de la organización
+  // Actualizar datos del negocio
   const updateOrganization = async (updates) => {
-    if (!organization?.id) return { error: 'No organization loaded' };
+    if (!organization?.id) return { error: 'No business loaded' };
 
     try {
       const { data, error } = await supabase
-        .from('organizations')
+        .from('businesses')
         .update(updates)
         .eq('id', organization.id)
         .select()
@@ -64,7 +73,7 @@ export const OrganizationProvider = ({ children }) => {
       setOrganization(data);
       return { data };
     } catch (err) {
-      console.error('Error updating organization:', err);
+      console.error('Error updating business:', err);
       return { error: err.message };
     }
   };
@@ -97,9 +106,12 @@ export const OrganizationProvider = ({ children }) => {
 
   const value = {
     organization,
+    // Alias para compatibilidad
+    business: organization,
     loading,
     error,
     updateOrganization,
+    updateBusiness: updateOrganization,
     refetch: () => {
       supabase.auth.getSession().then(({ data: { session } }) => {
         if (session?.user) {
@@ -123,5 +135,8 @@ export const useOrganization = () => {
   }
   return context;
 };
+
+// Alias para claridad
+export const useBusiness = useOrganization;
 
 export default OrganizationContext;

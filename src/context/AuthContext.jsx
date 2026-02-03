@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { supabase } from '../api/supabaseClient';
+import { supabase } from '../lib/supabase';
 
 const AuthContext = createContext(null);
 
@@ -28,8 +28,8 @@ export const AuthProvider = ({ children }) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Registro de nuevo usuario + organización
-  const signUp = async ({ email, password, fullName, organizationName }) => {
+  // Registro de nuevo usuario + negocio
+  const signUp = async ({ email, password, fullName, businessName }) => {
     try {
       // 1. Crear usuario en auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -41,32 +41,43 @@ export const AuthProvider = ({ children }) => {
 
       const userId = authData.user.id;
 
-      // 2. Crear organización
-      const slug = organizationName
+      // 2. Crear negocio (business)
+      const slug = businessName
         .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/(^-|-$)/g, '');
 
-      const { data: org, error: orgError } = await supabase
-        .from('organizations')
+      const { data: business, error: businessError } = await supabase
+        .from('businesses')
         .insert({
-          name: organizationName,
-          slug: `${slug}-${Date.now()}`,
+          name: businessName,
+          slug: `${slug}-${Date.now().toString(36)}`,
+          owner_user_id: userId,
         })
         .select()
         .single();
 
-      if (orgError) throw orgError;
+      if (businessError) throw businessError;
 
-      // 3. Crear profile vinculado
-      const { error: profileError } = await supabase.from('profiles').insert({
-        id: userId,
-        organization_id: org.id,
-        full_name: fullName,
+      // 3. Crear employee como owner
+      const { error: employeeError } = await supabase.from('employees').insert({
+        business_id: business.id,
+        auth_user_id: userId,
+        name: fullName,
+        email: email,
         role: 'owner',
+        permissions: {
+          can_add_stamps: true,
+          can_redeem: true,
+          can_adjust: true,
+          can_view_reports: true,
+          can_manage_settings: true,
+        },
       });
 
-      if (profileError) throw profileError;
+      if (employeeError) throw employeeError;
 
       return { data: authData, error: null };
     } catch (error) {

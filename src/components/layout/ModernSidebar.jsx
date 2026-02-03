@@ -14,11 +14,13 @@ import ThemeToggle from '../ui/ThemeToggle';
 
 /**
  * ModernSidebar
- * 
+ *
  * Glassmorphism sidebar with hover-expand behavior
  * - Collapsed: 64px (icons only)
  * - Expanded: 240px (icons + text)
  * - Mobile: Hidden (use bottom nav or hamburger menu)
+ *
+ * Paleta: #EAEFFE, #9787F3, #2D274B
  */
 const ModernSidebar = () => {
   const navigate = useNavigate();
@@ -117,12 +119,24 @@ const SidebarContainer = styled.aside`
   width: ${COLLAPSED_WIDTH};
   z-index: 9999;
 
-  /* Dark Premium Glass Effect */
-  background-color: rgba(15, 23, 42, 0.75);
-  backdrop-filter: blur(24px) saturate(120%);
-  -webkit-backdrop-filter: blur(24px) saturate(120%);
-  border-right: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.02);
+  /* Premium Glassmorphism Effect */
+  background: ${({ theme }) =>
+    theme.mode === 'dark'
+      ? 'rgba(26, 23, 48, 0.85)'
+      : 'rgba(255, 255, 255, 0.7)'
+  };
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-right: 1px solid ${({ theme }) =>
+    theme.mode === 'dark'
+      ? 'rgba(151, 135, 243, 0.15)'
+      : 'rgba(151, 135, 243, 0.2)'
+  };
+  box-shadow: ${({ theme }) =>
+    theme.mode === 'dark'
+      ? '4px 0 24px rgba(0, 0, 0, 0.3), inset -1px 0 0 rgba(151, 135, 243, 0.1)'
+      : '4px 0 24px rgba(151, 135, 243, 0.1), inset -1px 0 0 rgba(255, 255, 255, 0.5)'
+  };
 
   display: flex;
   flex-direction: column;
@@ -165,7 +179,8 @@ const LogoIcon = styled.button`
   height: 40px;
   min-width: 40px;
   border-radius: 12px;
-  background: linear-gradient(135deg, #10B981, #059669);
+  /* Violeta glassmorphism */
+  background: linear-gradient(135deg, #9787F3 0%, #7C6AE8 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -173,25 +188,26 @@ const LogoIcon = styled.button`
   border: none;
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
-  
+  box-shadow: 0 4px 12px rgba(151, 135, 243, 0.4);
+
   &:hover {
     transform: scale(1.05);
-    box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+    box-shadow: 0 6px 20px rgba(151, 135, 243, 0.5);
   }
 `;
 
 const LogoText = styled.span`
   font-size: 18px;
   font-weight: 700;
-  color: white;
+  color: ${({ theme }) => theme.colors.text.primary};
   white-space: nowrap;
   opacity: 0;
   transform: translateX(-10px);
-  transition: opacity 0.2s 0.1s, transform 0.2s 0.1s;
+  transition: opacity 0.2s 0.1s, transform 0.2s 0.1s, color 0.2s;
   cursor: pointer;
-  
+
   &:hover {
-    color: #10B981;
+    color: #9787F3;
   }
 `;
 
@@ -212,15 +228,31 @@ const NavItem = styled.button`
   gap: 12px;
   height: 44px;
   padding: 0 12px;
-  border-radius: 10px;
+  border-radius: 12px;
   border: none;
   cursor: pointer;
   position: relative;
-  background: ${({ $active }) => $active ? 'rgba(16, 185, 129, 0.15)' : 'transparent'};
-  transition: background 0.2s;
-  
+  /* Glass effect on active/hover */
+  background: ${({ $active, theme }) =>
+    $active
+      ? theme.mode === 'dark'
+        ? 'rgba(151, 135, 243, 0.2)'
+        : 'rgba(151, 135, 243, 0.15)'
+      : 'transparent'
+  };
+  backdrop-filter: ${({ $active }) => $active ? 'blur(8px)' : 'none'};
+  transition: all 0.2s ease;
+
   &:hover {
-    background: ${({ $active }) => $active ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255, 255, 255, 0.06)'};
+    background: ${({ $active, theme }) =>
+      $active
+        ? theme.mode === 'dark'
+          ? 'rgba(151, 135, 243, 0.25)'
+          : 'rgba(151, 135, 243, 0.2)'
+        : theme.mode === 'dark'
+          ? 'rgba(151, 135, 243, 0.1)'
+          : 'rgba(151, 135, 243, 0.08)'
+    };
   }
 `;
 
@@ -231,27 +263,36 @@ const NavIcon = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  /* Slate 400 normal, Emerald 500 active */
-  color: ${({ $active }) => $active ? '#10B981' : '#94A3B8'};
+  /* Violeta para activo, gris para normal */
+  color: ${({ $active, theme }) =>
+    $active
+      ? '#9787F3'
+      : theme.mode === 'dark'
+        ? '#C4B5FD'
+        : '#6554D4'
+  };
   transition: color 0.2s;
 
   ${NavItem}:hover & {
-    color: ${({ $active }) => $active ? '#10B981' : '#FFFFFF'};
+    color: ${({ $active }) => $active ? '#A78BFA' : '#9787F3'};
   }
 `;
 
 const NavLabel = styled.span`
   font-size: 14px;
   font-weight: 500;
-  /* Slate 300 normal, White active */
-  color: ${({ $active }) => $active ? '#FFFFFF' : '#CBD5E1'};
+  color: ${({ $active, theme }) =>
+    $active
+      ? theme.colors.text.primary
+      : theme.colors.text.secondary
+  };
   white-space: nowrap;
   opacity: 0;
   transform: translateX(-10px);
   transition: opacity 0.2s 0.1s, transform 0.2s 0.1s, color 0.2s;
 
   ${NavItem}:hover & {
-    color: #FFFFFF;
+    color: ${({ theme }) => theme.colors.text.primary};
   }
 `;
 
@@ -260,9 +301,10 @@ const ActiveIndicator = styled.div`
   left: -12px;
   width: 3px;
   height: 24px;
-  background: #10B981;
+  /* Violeta primario */
+  background: linear-gradient(180deg, #A78BFA 0%, #9787F3 100%);
   border-radius: 0 4px 4px 0;
-  box-shadow: 0 0 12px rgba(16, 185, 129, 0.6);
+  box-shadow: 0 0 12px rgba(151, 135, 243, 0.6);
 `;
 
 // ============================================
@@ -274,7 +316,11 @@ const BottomSection = styled.div`
   gap: 8px;
   padding: 0 12px;
   margin-top: auto;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-top: 1px solid ${({ theme }) =>
+    theme.mode === 'dark'
+      ? 'rgba(151, 135, 243, 0.1)'
+      : 'rgba(151, 135, 243, 0.15)'
+  };
   padding-top: 16px;
 `;
 
@@ -284,14 +330,18 @@ const ProfileItem = styled.button`
   gap: 12px;
   height: 48px;
   padding: 0 12px;
-  border-radius: 10px;
+  border-radius: 12px;
   border: none;
   cursor: pointer;
   background: transparent;
   transition: background 0.2s;
-  
+
   &:hover {
-    background: rgba(255, 255, 255, 0.06);
+    background: ${({ theme }) =>
+      theme.mode === 'dark'
+        ? 'rgba(151, 135, 243, 0.1)'
+        : 'rgba(151, 135, 243, 0.08)'
+    };
   }
 `;
 
@@ -300,13 +350,15 @@ const ProfileAvatar = styled.div`
   min-width: 36px;
   height: 36px;
   border-radius: 10px;
-  background: ${({ $color }) => $color || 'linear-gradient(135deg, #10B981, #059669)'};
+  /* Glassmorphism avatar */
+  background: ${({ $color }) => $color || 'linear-gradient(135deg, #9787F3 0%, #7C6AE8 100%)'};
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
   font-weight: 600;
   font-size: 14px;
+  box-shadow: 0 2px 8px rgba(151, 135, 243, 0.3);
 `;
 
 const ProfileInfo = styled.div`
@@ -321,13 +373,13 @@ const ProfileInfo = styled.div`
 const ProfileName = styled.span`
   font-size: 13px;
   font-weight: 600;
-  color: white;
+  color: ${({ theme }) => theme.colors.text.primary};
   white-space: nowrap;
 `;
 
 const ProfileRole = styled.span`
   font-size: 11px;
-  color: #64748B; /* Slate 500 */
+  color: ${({ theme }) => theme.colors.text.muted};
 `;
 
 const LogoutItem = styled.button`
@@ -336,19 +388,19 @@ const LogoutItem = styled.button`
   gap: 12px;
   height: 44px;
   padding: 0 12px;
-  border-radius: 10px;
+  border-radius: 12px;
   border: none;
   cursor: pointer;
   background: transparent;
   transition: background 0.2s;
-  
+
   &:hover {
-    background: rgba(239, 68, 68, 0.15);
-    
+    background: rgba(239, 68, 68, 0.1);
+
     ${() => LogoutIcon} {
       color: #F87171;
     }
-    
+
     ${() => LogoutLabel} {
       color: #F87171;
     }
@@ -362,14 +414,14 @@ const LogoutIcon = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #94A3B8; /* Slate 400 */
+  color: ${({ theme }) => theme.colors.text.muted};
   transition: color 0.2s;
 `;
 
 const LogoutLabel = styled.span`
   font-size: 14px;
   font-weight: 500;
-  color: #CBD5E1; /* Slate 300 */
+  color: ${({ theme }) => theme.colors.text.secondary};
   white-space: nowrap;
   opacity: 0;
   transform: translateX(-10px);

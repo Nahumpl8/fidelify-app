@@ -20,8 +20,8 @@ import { getDashboardStats } from '../../api/stats';
 /**
  * DashboardHome
  *
- * Modern "Dark Apple Minimalist" dashboard with Bento Box layout.
- * Uses Slate 950 background + Emerald 500 accents.
+ * Modern Glassmorphism dashboard with Bento Box layout.
+ * Paleta: #EAEFFE, #9787F3, #2D274B
  */
 const DashboardHome = () => {
   const { organization } = useOrganization();
@@ -227,15 +227,6 @@ const fadeInUp = keyframes`
   }
 `;
 
-const shimmer = keyframes`
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-`;
-
 const spin = keyframes`
   from {
     transform: rotate(0deg);
@@ -249,10 +240,9 @@ const spin = keyframes`
 // STYLED COMPONENTS
 // ============================================
 
-// Page Container - Slate 950 Background
+// Page Container - Transparent to show aurora background
 const PageContainer = styled.div`
   min-height: 100%;
-  background: #020617;
   padding: 32px;
 
   @media (max-width: 768px) {
@@ -273,14 +263,14 @@ const LoadingWrapper = styled.div`
 const LoadingSpinner = styled.div`
   width: 40px;
   height: 40px;
-  border: 3px solid rgba(16, 185, 129, 0.2);
-  border-top-color: #10B981;
+  border: 3px solid rgba(151, 135, 243, 0.2);
+  border-top-color: #9787F3;
   border-radius: 50%;
   animation: ${spin} 0.8s linear infinite;
 `;
 
 const LoadingText = styled.p`
-  color: #94A3B8;
+  color: ${({ theme }) => theme.colors.text.secondary};
   font-size: 14px;
 `;
 
@@ -304,7 +294,7 @@ const WelcomeContent = styled.div``;
 const WelcomeTitle = styled.h1`
   font-size: 32px;
   font-weight: 600;
-  color: #F8FAFC;
+  color: ${({ theme }) => theme.colors.text.primary};
   margin: 0 0 8px 0;
   letter-spacing: -0.02em;
 
@@ -315,7 +305,7 @@ const WelcomeTitle = styled.h1`
 
 const WelcomeSubtitle = styled.p`
   font-size: 16px;
-  color: #94A3B8;
+  color: ${({ theme }) => theme.colors.text.secondary};
   margin: 0;
 `;
 
@@ -324,7 +314,8 @@ const PrimaryActionButton = styled.button`
   align-items: center;
   gap: 8px;
   padding: 12px 24px;
-  background: #10B981;
+  /* Gradient violeta */
+  background: linear-gradient(135deg, #9787F3 0%, #7C6AE8 100%);
   color: white;
   font-size: 14px;
   font-weight: 600;
@@ -333,11 +324,12 @@ const PrimaryActionButton = styled.button`
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
+  box-shadow: 0 4px 16px rgba(151, 135, 243, 0.4);
 
   &:hover {
-    background: #059669;
-    transform: translateY(-1px);
-    box-shadow: 0 8px 24px -8px rgba(16, 185, 129, 0.5);
+    background: linear-gradient(135deg, #A78BFA 0%, #9787F3 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(151, 135, 243, 0.5);
   }
 
   &:active {
@@ -360,12 +352,21 @@ const BentoGrid = styled.div`
   }
 `;
 
-// Bento Card - Glassmorphism Dark
+// Bento Card - Glassmorphism
 const BentoCard = styled.div`
-  background: rgba(15, 23, 42, 0.8);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  /* Glassmorphism effect */
+  background: ${({ theme }) =>
+    theme.mode === 'dark'
+      ? 'rgba(45, 39, 75, 0.5)'
+      : 'rgba(255, 255, 255, 0.6)'
+  };
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid ${({ theme }) =>
+    theme.mode === 'dark'
+      ? 'rgba(151, 135, 243, 0.15)'
+      : 'rgba(255, 255, 255, 0.6)'
+  };
   border-radius: 24px;
   padding: 24px;
   display: flex;
@@ -376,6 +377,11 @@ const BentoCard = styled.div`
   animation: ${fadeInUp} 0.5s ease-out;
   animation-delay: ${({ $delay }) => $delay || 0}s;
   animation-fill-mode: both;
+  box-shadow: ${({ theme }) =>
+    theme.mode === 'dark'
+      ? '0 8px 32px rgba(0, 0, 0, 0.3)'
+      : '0 8px 32px rgba(151, 135, 243, 0.08)'
+  };
 
   /* Size variants */
   grid-column: span ${({ $size }) =>
@@ -399,8 +405,16 @@ const BentoCard = styled.div`
 
   &:hover {
     transform: translateY(-4px);
-    border-color: rgba(255, 255, 255, 0.1);
-    box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.6);
+    border-color: ${({ theme }) =>
+      theme.mode === 'dark'
+        ? 'rgba(151, 135, 243, 0.3)'
+        : 'rgba(151, 135, 243, 0.4)'
+    };
+    box-shadow: ${({ theme }) =>
+      theme.mode === 'dark'
+        ? '0 16px 48px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(151, 135, 243, 0.2)'
+        : '0 16px 48px rgba(151, 135, 243, 0.15)'
+    };
   }
 `;
 
@@ -418,27 +432,37 @@ const KPIIconWrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(16, 185, 129, 0.15);
+  /* Glass icon wrapper */
+  background: ${({ theme }) =>
+    theme.mode === 'dark'
+      ? 'rgba(151, 135, 243, 0.2)'
+      : 'rgba(151, 135, 243, 0.15)'
+  };
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(151, 135, 243, 0.3);
   border-radius: 12px;
-  color: #10B981;
+  color: #9787F3;
 `;
 
 const KPITrend = styled.span`
   display: inline-flex;
   align-items: center;
   gap: 2px;
-  padding: 4px 8px;
+  padding: 4px 10px;
+  /* Glass badge */
   background: rgba(16, 185, 129, 0.15);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(16, 185, 129, 0.25);
   color: #10B981;
   font-size: 12px;
   font-weight: 600;
-  border-radius: 8px;
+  border-radius: 20px;
 `;
 
 const KPIValue = styled.div`
   font-size: ${({ $isPercentage }) => $isPercentage ? '36px' : '40px'};
   font-weight: 700;
-  color: #F8FAFC;
+  color: ${({ theme }) => theme.colors.text.primary};
   letter-spacing: -0.02em;
   line-height: 1;
   margin-bottom: 8px;
@@ -451,13 +475,13 @@ const KPIValue = styled.div`
 const KPITitle = styled.div`
   font-size: 14px;
   font-weight: 500;
-  color: #F8FAFC;
+  color: ${({ theme }) => theme.colors.text.primary};
   margin-bottom: 4px;
 `;
 
 const KPISubtitle = styled.div`
   font-size: 12px;
-  color: #64748B;
+  color: ${({ theme }) => theme.colors.text.muted};
 `;
 
 // Section Label
@@ -469,11 +493,11 @@ const SectionLabel = styled.div`
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #64748B;
+  color: ${({ theme }) => theme.colors.text.muted};
   margin-bottom: 20px;
 
   svg {
-    color: #10B981;
+    color: #9787F3;
   }
 `;
 
@@ -492,20 +516,34 @@ const QuickActionButton = styled.a`
   gap: 12px;
   width: 100px;
   height: 100px;
-  background: rgba(30, 41, 59, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  /* Glass effect */
+  background: ${({ theme }) =>
+    theme.mode === 'dark'
+      ? 'rgba(58, 49, 144, 0.3)'
+      : 'rgba(255, 255, 255, 0.5)'
+  };
+  backdrop-filter: blur(12px);
+  border: 1px solid ${({ theme }) =>
+    theme.mode === 'dark'
+      ? 'rgba(151, 135, 243, 0.15)'
+      : 'rgba(151, 135, 243, 0.2)'
+  };
   border-radius: 20px;
   cursor: pointer;
   text-decoration: none;
   transition: all 0.2s ease;
 
   &:hover {
-    background: rgba(30, 41, 59, 0.9);
-    border-color: rgba(16, 185, 129, 0.3);
+    background: ${({ theme }) =>
+      theme.mode === 'dark'
+        ? 'rgba(151, 135, 243, 0.2)'
+        : 'rgba(151, 135, 243, 0.1)'
+    };
+    border-color: rgba(151, 135, 243, 0.4);
     transform: scale(1.02);
 
     svg {
-      color: #10B981;
+      color: #9787F3;
     }
   }
 
@@ -517,14 +555,14 @@ const QuickActionButton = styled.a`
 `;
 
 const QuickActionIcon = styled.div`
-  color: #94A3B8;
+  color: ${({ theme }) => theme.colors.text.secondary};
   transition: color 0.2s ease;
 `;
 
 const QuickActionLabel = styled.span`
   font-size: 11px;
   font-weight: 500;
-  color: #94A3B8;
+  color: ${({ theme }) => theme.colors.text.secondary};
   text-align: center;
   line-height: 1.2;
 `;
@@ -536,8 +574,14 @@ const EmptyStateCard = styled.div`
   gap: 24px;
   margin-top: 24px;
   padding: 32px;
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(15, 23, 42, 0.8) 100%);
-  border: 1px solid rgba(16, 185, 129, 0.2);
+  /* Glassmorphism with violet tint */
+  background: ${({ theme }) =>
+    theme.mode === 'dark'
+      ? 'linear-gradient(135deg, rgba(151, 135, 243, 0.15) 0%, rgba(45, 39, 75, 0.5) 100%)'
+      : 'linear-gradient(135deg, rgba(151, 135, 243, 0.1) 0%, rgba(255, 255, 255, 0.6) 100%)'
+  };
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(151, 135, 243, 0.25);
   border-radius: 24px;
   animation: ${fadeInUp} 0.5s ease-out 0.3s both;
 
@@ -555,9 +599,12 @@ const EmptyStateIcon = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(16, 185, 129, 0.15);
+  /* Glass icon */
+  background: rgba(151, 135, 243, 0.2);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(151, 135, 243, 0.3);
   border-radius: 16px;
-  color: #10B981;
+  color: #9787F3;
   flex-shrink: 0;
 `;
 
@@ -568,13 +615,13 @@ const EmptyStateContent = styled.div`
 const EmptyStateTitle = styled.h3`
   font-size: 18px;
   font-weight: 600;
-  color: #F8FAFC;
+  color: ${({ theme }) => theme.colors.text.primary};
   margin: 0 0 8px 0;
 `;
 
 const EmptyStateDescription = styled.p`
   font-size: 14px;
-  color: #94A3B8;
+  color: ${({ theme }) => theme.colors.text.secondary};
   margin: 0;
   line-height: 1.5;
 `;
@@ -584,19 +631,25 @@ const EmptyStateAction = styled.button`
   align-items: center;
   gap: 8px;
   padding: 12px 20px;
-  background: transparent;
-  color: #10B981;
+  /* Glass button */
+  background: ${({ theme }) =>
+    theme.mode === 'dark'
+      ? 'rgba(151, 135, 243, 0.15)'
+      : 'rgba(151, 135, 243, 0.1)'
+  };
+  backdrop-filter: blur(8px);
+  color: #9787F3;
   font-size: 14px;
   font-weight: 600;
-  border: 1px solid rgba(16, 185, 129, 0.4);
+  border: 1px solid rgba(151, 135, 243, 0.4);
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
 
   &:hover {
-    background: rgba(16, 185, 129, 0.1);
-    border-color: #10B981;
+    background: rgba(151, 135, 243, 0.2);
+    border-color: #9787F3;
   }
 `;
 

@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useOrganization } from '../context/OrganizationContext';
 import { createProgram, updateProgram, getProgram } from '../api/programs';
-import { supabase } from '../api/supabaseClient';
+import { supabase } from '../lib/supabase';
 import { INDUSTRY_TEMPLATES } from '../components/card-wizard/steps/Step1Template';
 
 /**
@@ -564,15 +564,16 @@ export function useProgramForm(programId = null) {
       reader.onerror = reject;
     });
 
-    // If no organization, use base64 (dev mode)
+    // If no organization (business), use base64 (dev mode)
     if (!organization?.id) {
-      console.warn('No organization, using base64 preview');
+      console.warn('No business, using base64 preview');
       return await toBase64(file);
     }
 
     try {
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}_${type}.${fileExt}`;
+      // Use business ID as folder path
       const filePath = `${organization.id}/${fileName}`;
 
       // Try to upload to Supabase Storage

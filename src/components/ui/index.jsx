@@ -1,69 +1,74 @@
 /**
  * Fidelify UI Kit
  *
- * Componentes reutilizables que consumen el tema automáticamente
- * Diseñados para ser responsive y accesibles
+ * Componentes reutilizables con estilo Glassmorphism Premium
+ * Paleta: #EAEFFE (claro), #9787F3 (primario), #2D274B (oscuro)
  */
 
 import styled, { css } from 'styled-components';
 
 // ============================================
-// 1. APP CARD - "Slot vs Active" Pattern
-// "Islands" concept: Slate 900 background, diffuse shadow
-// Active state: ALWAYS Emerald border - Never client color
+// 1. APP CARD - Glassmorphism "Frosted Glass"
 // ============================================
 /**
- * Card con dos estados visuales:
- * - Inactive (slot): "Island" - Slate background, subtle shadow
- * - Active: Emerald border, slightly tinted background
+ * Card con efecto vidrio esmerilizado estilo iOS
+ * - Inactive: Glass sutil
+ * - Active: Glass con borde violeta
  *
  * @prop {boolean} $active - Estado activo/inactivo
- * @prop {boolean} $clickable - Si es clickeable (añade hover effects)
+ * @prop {boolean} $clickable - Si es clickeable
  */
 export const AppCard = styled.div`
   position: relative;
-  border-radius: 16px;
+  border-radius: 20px;
   padding: ${({ theme }) => theme.space[5]};
-  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
   cursor: ${({ $clickable }) => ($clickable ? 'pointer' : 'default')};
+
+  /* Glassmorphism base */
+  background: ${({ theme }) =>
+    theme.mode === 'dark'
+      ? 'rgba(45, 39, 75, 0.5)'
+      : 'rgba(255, 255, 255, 0.6)'
+  };
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid ${({ theme }) =>
+    theme.mode === 'dark'
+      ? 'rgba(151, 135, 243, 0.15)'
+      : 'rgba(255, 255, 255, 0.6)'
+  };
+  box-shadow: ${({ theme }) =>
+    theme.mode === 'dark'
+      ? '0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05)'
+      : '0 8px 32px rgba(151, 135, 243, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8)'
+  };
 
   /* Mobile: Touch-friendly padding */
   @media (max-width: ${({ theme }) => theme.breakpoints.sm}) {
     padding: ${({ theme }) => theme.space[4]};
-    border-radius: 14px;
+    border-radius: 16px;
   }
 
-  /* STATE: Inactive (Island) */
-  ${({ $active, theme }) =>
-    !$active &&
-    css`
-      /* Island style: Slate 900 background with diffuse shadow */
-      background: ${theme.mode === 'dark'
-        ? 'rgba(15, 23, 42, 0.7)'
-        : 'rgba(248, 250, 252, 0.9)'};
-      border: 2px solid transparent;
-      box-shadow: ${theme.mode === 'dark'
-        ? '0 4px 16px rgba(0, 0, 0, 0.25)'
-        : '0 4px 16px rgba(0, 0, 0, 0.06)'};
-    `}
-
-  /* STATE: Active - ALWAYS Emerald */
-  ${({ $active, theme }) =>
+  /* STATE: Active - Violeta border */
+  ${({ $active }) =>
     $active &&
     css`
-      /* Emerald border and tinted background */
-      background: ${theme.mode === 'dark'
-        ? 'rgba(16, 185, 129, 0.05)'
-        : 'rgba(16, 185, 129, 0.04)'};
-      border: 2px solid #10B981;
+      background: ${({ theme }) =>
+        theme.mode === 'dark'
+          ? 'rgba(151, 135, 243, 0.15)'
+          : 'rgba(151, 135, 243, 0.08)'
+      };
+      border: 2px solid #9787F3;
       box-shadow:
-        0 4px 16px rgba(16, 185, 129, 0.15),
-        0 0 0 1px rgba(16, 185, 129, 0.1);
+        0 8px 32px rgba(151, 135, 243, 0.2),
+        0 0 0 1px rgba(151, 135, 243, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
 
       &:hover {
         box-shadow:
-          0 8px 24px rgba(16, 185, 129, 0.2),
-          0 0 0 1px rgba(16, 185, 129, 0.15);
+          0 12px 40px rgba(151, 135, 243, 0.25),
+          0 0 0 1px rgba(151, 135, 243, 0.2);
       }
     `}
 
@@ -74,39 +79,38 @@ export const AppCard = styled.div`
     css`
       &:hover {
         background: ${theme.mode === 'dark'
-          ? 'rgba(30, 41, 59, 0.8)'
-          : 'rgba(241, 245, 249, 1)'};
+          ? 'rgba(58, 49, 144, 0.4)'
+          : 'rgba(255, 255, 255, 0.8)'};
         border-color: ${theme.mode === 'dark'
-          ? 'rgba(255, 255, 255, 0.08)'
-          : 'rgba(0, 0, 0, 0.06)'};
-        transform: translateY(-2px);
+          ? 'rgba(151, 135, 243, 0.3)'
+          : 'rgba(151, 135, 243, 0.4)'};
+        transform: translateY(-4px);
         box-shadow: ${theme.mode === 'dark'
-          ? '0 8px 24px rgba(0, 0, 0, 0.35)'
-          : '0 8px 24px rgba(0, 0, 0, 0.08)'};
+          ? '0 16px 48px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(151, 135, 243, 0.2)'
+          : '0 16px 48px rgba(151, 135, 243, 0.15), 0 0 0 1px rgba(151, 135, 243, 0.2)'};
       }
 
       &:active {
-        transform: translateY(0);
+        transform: translateY(-2px);
       }
     `}
 `;
 
 // ============================================
-// 2. APP BUTTON - Variants: primary, secondary, ghost
-// ALWAYS Emerald for primary - Never client color
+// 2. APP BUTTON - Glassmorphism Variants
 // ============================================
 const buttonVariants = {
   primary: css`
-    /* IMMUTABLE: Always Emerald 500 - Never uses theme.colors.primary to avoid client color contamination */
-    background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+    /* Gradient violeta con glass effect */
+    background: linear-gradient(135deg, #9787F3 0%, #7C6AE8 100%);
     color: white;
     border: none;
-    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+    box-shadow: 0 4px 16px rgba(151, 135, 243, 0.4);
 
     &:hover:not(:disabled) {
-      background: linear-gradient(135deg, #059669 0%, #047857 100%);
-      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.5);
-      transform: translateY(-1px);
+      background: linear-gradient(135deg, #A78BFA 0%, #9787F3 100%);
+      box-shadow: 0 8px 24px rgba(151, 135, 243, 0.5);
+      transform: translateY(-2px);
     }
 
     &:active:not(:disabled) {
@@ -115,63 +119,70 @@ const buttonVariants = {
   `,
 
   secondary: css`
-    /* Slate glass style - no borders */
+    /* Glass button */
     background: ${({ theme }) => theme.mode === 'dark'
-      ? 'rgba(15, 23, 42, 0.6)'
-      : 'rgba(241, 245, 249, 0.9)'};
+      ? 'rgba(45, 39, 75, 0.5)'
+      : 'rgba(255, 255, 255, 0.6)'};
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     color: ${({ theme }) => theme.mode === 'dark'
-      ? 'rgba(248, 250, 252, 0.9)'
-      : 'rgba(51, 65, 85, 0.9)'};
+      ? '#EAEFFE'
+      : '#2D274B'};
     border: 1px solid ${({ theme }) => theme.mode === 'dark'
-      ? 'rgba(255, 255, 255, 0.05)'
-      : 'rgba(0, 0, 0, 0.06)'};
+      ? 'rgba(151, 135, 243, 0.2)'
+      : 'rgba(151, 135, 243, 0.3)'};
 
     &:hover:not(:disabled) {
       background: ${({ theme }) => theme.mode === 'dark'
-        ? 'rgba(30, 41, 59, 0.8)'
-        : 'rgba(226, 232, 240, 1)'};
-      border-color: #10B981;
-      color: #10B981;
+        ? 'rgba(58, 49, 144, 0.5)'
+        : 'rgba(255, 255, 255, 0.85)'};
+      border-color: #9787F3;
+      color: #9787F3;
+      transform: translateY(-1px);
     }
   `,
 
   ghost: css`
     background: transparent;
-    color: ${({ theme }) => theme.mode === 'dark'
-      ? 'rgba(148, 163, 184, 0.9)'
-      : 'rgba(71, 85, 105, 0.9)'};
+    color: ${({ theme }) => theme.colors.text.secondary};
     border: none;
 
     &:hover:not(:disabled) {
       background: ${({ theme }) => theme.mode === 'dark'
-        ? 'rgba(30, 41, 59, 0.5)'
-        : 'rgba(241, 245, 249, 0.9)'};
-      color: ${({ theme }) => theme.mode === 'dark'
-        ? 'rgba(248, 250, 252, 1)'
-        : 'rgba(30, 41, 59, 1)'};
+        ? 'rgba(151, 135, 243, 0.1)'
+        : 'rgba(151, 135, 243, 0.08)'};
+      color: ${({ theme }) => theme.colors.text.primary};
     }
   `,
 
   accent: css`
-    /* Accent also uses Emerald */
-    background: linear-gradient(135deg, #10B981 0%, #059669 100%);
-    color: white;
-    border: none;
-    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+    /* Glass con borde violeta */
+    background: ${({ theme }) => theme.mode === 'dark'
+      ? 'rgba(151, 135, 243, 0.15)'
+      : 'rgba(151, 135, 243, 0.1)'};
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    color: #9787F3;
+    border: 1px solid rgba(151, 135, 243, 0.3);
 
     &:hover:not(:disabled) {
-      background: linear-gradient(135deg, #34D399 0%, #10B981 100%);
+      background: ${({ theme }) => theme.mode === 'dark'
+        ? 'rgba(151, 135, 243, 0.25)'
+        : 'rgba(151, 135, 243, 0.15)'};
+      border-color: #9787F3;
       transform: translateY(-1px);
     }
   `,
 
   danger: css`
-    background: ${({ theme }) => theme.colors.error};
-    color: white;
-    border: none;
+    background: rgba(239, 68, 68, 0.15);
+    backdrop-filter: blur(12px);
+    color: #EF4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
 
     &:hover:not(:disabled) {
-      opacity: 0.9;
+      background: rgba(239, 68, 68, 0.2);
+      border-color: #EF4444;
       transform: translateY(-1px);
     }
   `,
@@ -186,11 +197,11 @@ export const AppButton = styled.button`
   font-family: ${({ theme }) => theme.fonts.body};
   font-size: ${({ theme }) => theme.fontSizes.sm};
   font-weight: ${({ theme }) => theme.fontWeights.medium};
-  border-radius: ${({ theme }) => theme.radii.lg};
+  border-radius: 14px;
   cursor: pointer;
-  transition: all ${({ theme }) => theme.transitions.fast};
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
-  min-height: 44px; /* Touch-friendly minimum */
+  min-height: 44px;
 
   /* Apply variant styles */
   ${({ $variant = 'primary' }) => buttonVariants[$variant] || buttonVariants.primary}
@@ -217,6 +228,7 @@ export const AppButton = styled.button`
       padding: ${theme.space[2]} ${theme.space[3]};
       font-size: ${theme.fontSizes.xs};
       min-height: 36px;
+      border-radius: 10px;
     `}
 
   ${({ $size, theme }) =>
@@ -225,6 +237,7 @@ export const AppButton = styled.button`
       padding: ${theme.space[4]} ${theme.space[6]};
       font-size: ${theme.fontSizes.md};
       min-height: 52px;
+      border-radius: 16px;
     `}
 
   /* Mobile: Ensure touch targets */
@@ -235,57 +248,54 @@ export const AppButton = styled.button`
 `;
 
 // ============================================
-// 3. APP INPUT - "Filled" Style (iOS-inspired)
-// NO borders by default, solid background, rounded corners
-// Focus: Emerald border glow - NEVER client color
+// 3. APP INPUT - Glassmorphism "Filled" Style
 // ============================================
 export const AppInput = styled.input`
   width: 100%;
   padding: ${({ theme }) => `${theme.space[3]} ${theme.space[4]}`};
   font-family: ${({ theme }) => theme.fonts.body};
   font-size: ${({ theme }) => theme.fontSizes.md};
-  color: ${({ theme }) => theme.mode === 'dark'
-    ? 'rgba(248, 250, 252, 0.95)'
-    : 'rgba(30, 41, 59, 0.95)'};
+  color: ${({ theme }) => theme.colors.text.primary};
 
-  /* FILLED STYLE: Solid background, no border */
+  /* Glass effect */
   background: ${({ theme }) => theme.mode === 'dark'
-    ? 'rgba(15, 23, 42, 0.8)'
-    : 'rgba(241, 245, 249, 0.9)'};
-  border: 2px solid transparent;
+    ? 'rgba(26, 23, 48, 0.6)'
+    : 'rgba(255, 255, 255, 0.7)'};
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 2px solid ${({ theme }) => theme.mode === 'dark'
+    ? 'rgba(151, 135, 243, 0.15)'
+    : 'rgba(151, 135, 243, 0.2)'};
   border-radius: 14px;
 
   outline: none;
-  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
-  min-height: 44px;
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 48px;
 
   &::placeholder {
-    color: ${({ theme }) => theme.mode === 'dark'
-      ? 'rgba(100, 116, 139, 0.7)'
-      : 'rgba(148, 163, 184, 0.9)'};
+    color: ${({ theme }) => theme.colors.text.muted};
   }
 
   &:hover:not(:disabled):not(:focus) {
     background: ${({ theme }) => theme.mode === 'dark'
-      ? 'rgba(30, 41, 59, 0.9)'
-      : 'rgba(226, 232, 240, 1)'};
+      ? 'rgba(45, 39, 75, 0.6)'
+      : 'rgba(255, 255, 255, 0.85)'};
+    border-color: ${({ theme }) => theme.mode === 'dark'
+      ? 'rgba(151, 135, 243, 0.25)'
+      : 'rgba(151, 135, 243, 0.35)'};
   }
 
   &:focus {
-    /* ALWAYS Emerald border on focus - Never client color */
-    border-color: #10B981;
+    border-color: #9787F3;
     background: ${({ theme }) => theme.mode === 'dark'
-      ? 'rgba(15, 23, 42, 0.95)'
-      : 'rgba(255, 255, 255, 1)'};
-    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+      ? 'rgba(45, 39, 75, 0.8)'
+      : 'rgba(255, 255, 255, 0.95)'};
+    box-shadow: 0 0 0 4px rgba(151, 135, 243, 0.15);
   }
 
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-    background: ${({ theme }) => theme.mode === 'dark'
-      ? 'rgba(15, 23, 42, 0.4)'
-      : 'rgba(226, 232, 240, 0.6)'};
   }
 
   /* Error state */
@@ -294,63 +304,60 @@ export const AppInput = styled.input`
     css`
       border-color: #EF4444;
       &:focus {
-        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+        box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.15);
       }
     `}
 
   /* Mobile optimization */
   @media (max-width: ${({ theme }) => theme.breakpoints.sm}) {
     font-size: 16px;
-    min-height: 48px;
+    min-height: 52px;
     border-radius: 12px;
   }
 `;
 
 // ============================================
-// 4. APP TEXTAREA - "Filled" Style (iOS-inspired)
-// NO borders by default, solid background, rounded corners
-// Focus: Emerald border glow - NEVER client color
+// 4. APP TEXTAREA - Glassmorphism
 // ============================================
 export const AppTextarea = styled.textarea`
   width: 100%;
   padding: ${({ theme }) => theme.space[4]};
   font-family: ${({ theme }) => theme.fonts.body};
   font-size: ${({ theme }) => theme.fontSizes.md};
-  color: ${({ theme }) => theme.mode === 'dark'
-    ? 'rgba(248, 250, 252, 0.95)'
-    : 'rgba(30, 41, 59, 0.95)'};
+  color: ${({ theme }) => theme.colors.text.primary};
 
-  /* FILLED STYLE: Solid background, no border */
+  /* Glass effect */
   background: ${({ theme }) => theme.mode === 'dark'
-    ? 'rgba(15, 23, 42, 0.8)'
-    : 'rgba(241, 245, 249, 0.9)'};
-  border: 2px solid transparent;
+    ? 'rgba(26, 23, 48, 0.6)'
+    : 'rgba(255, 255, 255, 0.7)'};
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 2px solid ${({ theme }) => theme.mode === 'dark'
+    ? 'rgba(151, 135, 243, 0.15)'
+    : 'rgba(151, 135, 243, 0.2)'};
   border-radius: 14px;
 
   outline: none;
   resize: vertical;
-  min-height: 100px;
-  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 120px;
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
 
   &::placeholder {
-    color: ${({ theme }) => theme.mode === 'dark'
-      ? 'rgba(100, 116, 139, 0.7)'
-      : 'rgba(148, 163, 184, 0.9)'};
+    color: ${({ theme }) => theme.colors.text.muted};
   }
 
   &:hover:not(:disabled):not(:focus) {
     background: ${({ theme }) => theme.mode === 'dark'
-      ? 'rgba(30, 41, 59, 0.9)'
-      : 'rgba(226, 232, 240, 1)'};
+      ? 'rgba(45, 39, 75, 0.6)'
+      : 'rgba(255, 255, 255, 0.85)'};
   }
 
   &:focus {
-    /* ALWAYS Emerald border on focus - Never client color */
-    border-color: #10B981;
+    border-color: #9787F3;
     background: ${({ theme }) => theme.mode === 'dark'
-      ? 'rgba(15, 23, 42, 0.95)'
-      : 'rgba(255, 255, 255, 1)'};
-    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+      ? 'rgba(45, 39, 75, 0.8)'
+      : 'rgba(255, 255, 255, 0.95)'};
+    box-shadow: 0 0 0 4px rgba(151, 135, 243, 0.15);
   }
 
   @media (max-width: ${({ theme }) => theme.breakpoints.sm}) {
@@ -375,7 +382,7 @@ export const AppLabel = styled.label`
     css`
       &::after {
         content: ' *';
-        color: ${({ theme }) => theme.colors.error};
+        color: #EF4444;
       }
     `}
 `;
@@ -433,50 +440,62 @@ export const AppFlex = styled.div`
 export const AppDivider = styled.hr`
   border: none;
   height: 1px;
-  background: ${({ theme }) => theme.colors.border};
+  background: ${({ theme }) => theme.mode === 'dark'
+    ? 'rgba(151, 135, 243, 0.15)'
+    : 'rgba(151, 135, 243, 0.2)'};
   margin: ${({ $spacing, theme }) => theme.space[$spacing] || theme.space[6]} 0;
 `;
 
 // ============================================
-// 9. APP BADGE
+// 9. APP BADGE - Glassmorphism
 // ============================================
 const badgeVariants = {
   default: css`
-    background: ${({ theme }) => theme.colors.surfaceHover};
+    background: ${({ theme }) => theme.mode === 'dark'
+      ? 'rgba(151, 135, 243, 0.15)'
+      : 'rgba(151, 135, 243, 0.1)'};
     color: ${({ theme }) => theme.colors.text.secondary};
+    border: 1px solid ${({ theme }) => theme.mode === 'dark'
+      ? 'rgba(151, 135, 243, 0.2)'
+      : 'rgba(151, 135, 243, 0.15)'};
   `,
   primary: css`
-    background: ${({ theme }) => theme.colors.primaryLight};
-    color: ${({ theme }) => theme.colors.primary};
+    background: rgba(151, 135, 243, 0.2);
+    color: #9787F3;
+    border: 1px solid rgba(151, 135, 243, 0.3);
   `,
   success: css`
-    background: ${({ theme }) => theme.colors.successLight};
-    color: ${({ theme }) => theme.colors.success};
+    background: rgba(16, 185, 129, 0.15);
+    color: #10B981;
+    border: 1px solid rgba(16, 185, 129, 0.25);
   `,
   warning: css`
-    background: ${({ theme }) => theme.colors.warningLight};
-    color: ${({ theme }) => theme.colors.warning};
+    background: rgba(245, 158, 11, 0.15);
+    color: #F59E0B;
+    border: 1px solid rgba(245, 158, 11, 0.25);
   `,
   error: css`
-    background: ${({ theme }) => theme.colors.errorLight};
-    color: ${({ theme }) => theme.colors.error};
+    background: rgba(239, 68, 68, 0.15);
+    color: #EF4444;
+    border: 1px solid rgba(239, 68, 68, 0.25);
   `,
 };
 
 export const AppBadge = styled.span`
   display: inline-flex;
   align-items: center;
-  padding: ${({ theme }) => `${theme.space[1]} ${theme.space[2]}`};
+  padding: ${({ theme }) => `${theme.space[1]} ${theme.space[3]}`};
   font-size: ${({ theme }) => theme.fontSizes.xs};
   font-weight: ${({ theme }) => theme.fontWeights.medium};
-  border-radius: ${({ theme }) => theme.radii.full};
+  border-radius: 20px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 
   ${({ $variant = 'default' }) => badgeVariants[$variant]}
 `;
 
 // ============================================
-// 10. APP SWITCH / TOGGLE
-// ALWAYS Emerald when checked - Never client color
+// 10. APP SWITCH / TOGGLE - Glassmorphism
 // ============================================
 export const AppSwitch = styled.label`
   position: relative;
@@ -493,16 +512,20 @@ export const AppSwitch = styled.label`
     position: absolute;
   }
 
-  /* The track */
+  /* The track - glass effect */
   span.track {
     position: relative;
-    width: 48px;
+    width: 52px;
     height: 28px;
     background: ${({ theme }) => theme.mode === 'dark'
-      ? 'rgba(71, 85, 105, 0.6)'
-      : 'rgba(203, 213, 225, 0.9)'};
+      ? 'rgba(45, 39, 75, 0.6)'
+      : 'rgba(151, 135, 243, 0.2)'};
+    backdrop-filter: blur(8px);
+    border: 1px solid ${({ theme }) => theme.mode === 'dark'
+      ? 'rgba(151, 135, 243, 0.2)'
+      : 'rgba(151, 135, 243, 0.25)'};
     border-radius: 9999px;
-    transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   /* The thumb */
@@ -511,27 +534,28 @@ export const AppSwitch = styled.label`
     position: absolute;
     top: 2px;
     left: 2px;
-    width: 24px;
-    height: 24px;
+    width: 22px;
+    height: 22px;
     background: white;
     border-radius: 50%;
-    transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   }
 
-  /* Checked state - ALWAYS Emerald */
+  /* Checked state - Violeta */
   input:checked + span.track {
-    background: #10B981;
-    box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
+    background: linear-gradient(135deg, #9787F3 0%, #7C6AE8 100%);
+    border-color: transparent;
+    box-shadow: 0 0 16px rgba(151, 135, 243, 0.4);
   }
 
   input:checked + span.track::after {
-    transform: translateX(20px);
+    transform: translateX(24px);
   }
 
-  /* Focus state - Emerald glow */
+  /* Focus state */
   input:focus-visible + span.track {
-    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+    box-shadow: 0 0 0 4px rgba(151, 135, 243, 0.25);
   }
 `;
 
@@ -544,17 +568,26 @@ export const ThemeToggle = styled.button`
   justify-content: center;
   width: fit-content;
   height: 40px;
-  border-radius: ${({ theme }) => theme.radii.lg};
-  background: ${({ theme }) => theme.colors.surface};
-  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: 12px;
+  /* Glass effect */
+  background: ${({ theme }) => theme.mode === 'dark'
+    ? 'rgba(45, 39, 75, 0.5)'
+    : 'rgba(255, 255, 255, 0.6)'};
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid ${({ theme }) => theme.mode === 'dark'
+    ? 'rgba(151, 135, 243, 0.2)'
+    : 'rgba(151, 135, 243, 0.25)'};
   color: ${({ theme }) => theme.colors.text.secondary};
   cursor: pointer;
-  transition: all ${({ theme }) => theme.transitions.fast};
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
 
   &:hover {
-    background: ${({ theme }) => theme.colors.surfaceHover};
-    color: ${({ theme }) => theme.colors.text.primary};
-    border-color: ${({ theme }) => theme.colors.primary};
+    background: ${({ theme }) => theme.mode === 'dark'
+      ? 'rgba(58, 49, 144, 0.5)'
+      : 'rgba(255, 255, 255, 0.85)'};
+    color: #9787F3;
+    border-color: #9787F3;
   }
 
   svg {
@@ -608,8 +641,8 @@ export const FormGroup = styled.div`
 export const HelperText = styled.span`
   display: block;
   font-size: ${({ theme }) => theme.fontSizes.xs};
-  color: ${({ $error, theme }) =>
-    $error ? theme.colors.error : theme.colors.text.muted};
+  color: ${({ $error }) =>
+    $error ? '#EF4444' : '${({ theme }) => theme.colors.text.muted}'};
   margin-top: ${({ theme }) => theme.space[1]};
 `;
 
@@ -644,4 +677,74 @@ export const VisuallyHidden = styled.span`
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
+`;
+
+// ============================================
+// 17. GLASS PANEL - Contenedor glassmorphism
+// ============================================
+export const GlassPanel = styled.div`
+  background: ${({ theme }) =>
+    theme.mode === 'dark'
+      ? 'rgba(45, 39, 75, 0.4)'
+      : 'rgba(255, 255, 255, 0.5)'
+  };
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid ${({ theme }) =>
+    theme.mode === 'dark'
+      ? 'rgba(151, 135, 243, 0.15)'
+      : 'rgba(255, 255, 255, 0.6)'
+  };
+  border-radius: ${({ $radius }) => $radius || '20px'};
+  padding: ${({ $padding, theme }) => $padding || theme.space[5]};
+  box-shadow: ${({ theme }) =>
+    theme.mode === 'dark'
+      ? '0 8px 32px rgba(0, 0, 0, 0.3)'
+      : '0 8px 32px rgba(151, 135, 243, 0.08)'
+  };
+`;
+
+// ============================================
+// 18. ICON BUTTON - Glassmorphism
+// ============================================
+export const IconButton = styled.button`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: ${({ $size }) => $size === 'sm' ? '36px' : $size === 'lg' ? '52px' : '44px'};
+  height: ${({ $size }) => $size === 'sm' ? '36px' : $size === 'lg' ? '52px' : '44px'};
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Glass effect */
+  background: ${({ theme }) => theme.mode === 'dark'
+    ? 'rgba(45, 39, 75, 0.5)'
+    : 'rgba(255, 255, 255, 0.6)'};
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid ${({ theme }) => theme.mode === 'dark'
+    ? 'rgba(151, 135, 243, 0.15)'
+    : 'rgba(151, 135, 243, 0.2)'};
+  color: ${({ theme }) => theme.colors.text.secondary};
+
+  &:hover:not(:disabled) {
+    background: ${({ theme }) => theme.mode === 'dark'
+      ? 'rgba(151, 135, 243, 0.2)'
+      : 'rgba(151, 135, 243, 0.1)'};
+    color: #9787F3;
+    border-color: rgba(151, 135, 243, 0.4);
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  svg {
+    width: ${({ $size }) => $size === 'sm' ? '16px' : $size === 'lg' ? '24px' : '20px'};
+    height: ${({ $size }) => $size === 'sm' ? '16px' : $size === 'lg' ? '24px' : '20px'};
+  }
 `;

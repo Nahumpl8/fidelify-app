@@ -8,6 +8,7 @@ import ForgotPassword from './pages/auth/ForgotPassword';
 
 // Pages - Public
 import Landing from './pages/public/Landing';
+import JoinPage from './pages/public/JoinPage';
 
 // Pages - Dashboard
 import DashboardLayout from './components/layout/DashboardLayout';
@@ -99,6 +100,9 @@ const Router = () => {
     <Routes>
       {/* Rutas públicas */}
       <Route path="/" element={<Landing />} />
+
+      {/* Registro de clientes por slug del negocio */}
+      <Route path="/join/:slug" element={<JoinPage />} />
 
       {/* Rutas de autenticación */}
       <Route

@@ -1,49 +1,70 @@
-import { supabase } from './supabaseClient';
+import { supabase } from '../lib/supabase';
 
 /**
  * Obtener estadísticas del dashboard
  */
-export const getDashboardStats = async (organizationId) => {
+export const getDashboardStats = async (businessId) => {
   try {
-    // Total de clientes
+    // Total de tarjetas (clientes)
     const { count: totalCustomers, error: customersError } = await supabase
-      .from('customers')
+      .from('loyalty_cards')
       .select('*', { count: 'exact', head: true })
-      .eq('organization_id', organizationId);
+      .eq('business_id', businessId);
 
     if (customersError) throw customersError;
 
-    // Pases activos (clientes con puntos > 0)
+    // Tarjetas activas (con balance > 0)
     const { count: activeCards, error: activeError } = await supabase
-      .from('customers')
+      .from('loyalty_cards')
       .select('*', { count: 'exact', head: true })
-      .eq('organization_id', organizationId)
-      .gt('current_points', 0);
+      .eq('business_id', businessId)
+      .eq('state', 'ACTIVE')
+      .gt('current_balance', 0);
 
     if (activeError) throw activeError;
 
-    // Total de puntos otorgados (suma de transacciones tipo 'earn')
-    const { data: pointsData, error: pointsError } = await supabase
+    // Total de puntos/sellos otorgados
+    const { data: earnData, error: earnError } = await supabase
       .from('transactions')
-      .select('points_change')
-      .eq('organization_id', organizationId)
-      .eq('type', 'earn');
+      .select('amount, card_id')
+      .eq('type', 'EARN')
+      .in('card_id',
+        supabase
+          .from('loyalty_cards')
+          .select('id')
+          .eq('business_id', businessId)
+      );
 
-    if (pointsError) throw pointsError;
+    // Alternativa si el subquery no funciona
+    const { data: cards } = await supabase
+      .from('loyalty_cards')
+      .select('id')
+      .eq('business_id', businessId);
 
-    const totalPointsGiven = pointsData?.reduce(
-      (sum, t) => sum + t.points_change,
-      0
-    ) || 0;
+    const cardIds = cards?.map(c => c.id) || [];
+
+    let totalPointsGiven = 0;
+    if (cardIds.length > 0) {
+      const { data: txData } = await supabase
+        .from('transactions')
+        .select('amount')
+        .eq('type', 'EARN')
+        .in('card_id', cardIds);
+
+      totalPointsGiven = txData?.reduce((sum, t) => sum + (t.amount || 0), 0) || 0;
+    }
 
     // Recompensas canjeadas
-    const { count: rewardsRedeemed, error: rewardsError } = await supabase
-      .from('transactions')
-      .select('*', { count: 'exact', head: true })
-      .eq('organization_id', organizationId)
-      .eq('type', 'redeem');
+    let rewardsRedeemed = 0;
+    if (cardIds.length > 0) {
+      const { count } = await supabase
+        .from('transactions')
+        .select('*', { count: 'exact', head: true })
+        .eq('type', 'REDEEM')
+        .in('card_id', cardIds);
 
-    if (rewardsError) throw rewardsError;
+      rewardsRedeemed = count || 0;
+    }
 
     // Clientes nuevos este mes
     const startOfMonth = new Date();
@@ -51,9 +72,9 @@ export const getDashboardStats = async (organizationId) => {
     startOfMonth.setHours(0, 0, 0, 0);
 
     const { count: newCustomersThisMonth, error: newError } = await supabase
-      .from('customers')
+      .from('loyalty_cards')
       .select('*', { count: 'exact', head: true })
-      .eq('organization_id', organizationId)
+      .eq('business_id', businessId)
       .gte('created_at', startOfMonth.toISOString());
 
     if (newError) throw newError;
@@ -63,7 +84,7 @@ export const getDashboardStats = async (organizationId) => {
         totalCustomers: totalCustomers || 0,
         activeCards: activeCards || 0,
         totalPointsGiven,
-        rewardsRedeemed: rewardsRedeemed || 0,
+        rewardsRedeemed,
         newCustomersThisMonth: newCustomersThisMonth || 0,
       },
       error: null,
@@ -76,19 +97,43 @@ export const getDashboardStats = async (organizationId) => {
 /**
  * Obtener actividad reciente
  */
-export const getRecentActivity = async (organizationId, limit = 10) => {
+export const getRecentActivity = async (businessId, limit = 10) => {
+  // Primero obtener las tarjetas del negocio
+  const { data: cards } = await supabase
+    .from('loyalty_cards')
+    .select('id')
+    .eq('business_id', businessId);
+
+  const cardIds = cards?.map(c => c.id) || [];
+
+  if (cardIds.length === 0) {
+    return { data: [], error: null };
+  }
+
   const { data, error } = await supabase
     .from('transactions')
     .select(`
       *,
-      customers (
-        full_name,
-        email
+      card:loyalty_cards (
+        id,
+        client:clients (
+          full_name,
+          email
+        )
       )
     `)
-    .eq('organization_id', organizationId)
+    .in('card_id', cardIds)
     .order('created_at', { ascending: false })
     .limit(limit);
 
-  return { data, error };
+  // Transformar para compatibilidad
+  const activity = data?.map(tx => ({
+    ...tx,
+    customers: tx.card?.client ? {
+      full_name: tx.card.client.full_name,
+      email: tx.card.client.email,
+    } : null,
+  })) || [];
+
+  return { data: activity, error };
 };
