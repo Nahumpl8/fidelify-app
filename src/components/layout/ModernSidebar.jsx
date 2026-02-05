@@ -2,6 +2,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import styled, { css } from 'styled-components';
 import {
   LayoutDashboard,
+  ScanLine,
   Users,
   CreditCard,
   Settings,
@@ -35,6 +36,7 @@ const ModernSidebar = () => {
 
   const navItems = [
     { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+    { to: '/dashboard/scan', icon: ScanLine, label: 'Escanear' },
     { to: '/dashboard/clients', icon: Users, label: 'Clientes' },
     { to: '/dashboard/wizard', icon: CreditCard, label: 'Constructor' },
     { to: '/dashboard/settings', icon: Settings, label: 'Configuración' },

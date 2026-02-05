@@ -17,6 +17,7 @@ import Overview from './pages/dashboard/Overview';
 import Customers from './pages/dashboard/Customers';
 import ClientsPage from './pages/dashboard/ClientsPage';
 import ClientDetailPage from './pages/dashboard/ClientDetailPage';
+import ScanPage from './pages/dashboard/ScanPage';
 import Settings from './pages/dashboard/Settings';
 
 // Pages - Builder
@@ -168,6 +169,14 @@ const Router = () => {
         element={
           <DashboardRoute>
             <ClientDetailPage />
+          </DashboardRoute>
+        }
+      />
+      <Route
+        path="/dashboard/scan"
+        element={
+          <DashboardRoute>
+            <ScanPage />
           </DashboardRoute>
         }
       />

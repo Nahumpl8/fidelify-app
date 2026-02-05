@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
 import {
   Users,
@@ -24,6 +25,7 @@ import { getDashboardStats } from '../../api/stats';
  * Paleta: #EAEFFE, #9787F3, #2D274B
  */
 const DashboardHome = () => {
+  const navigate = useNavigate();
   const { organization } = useOrganization();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -138,7 +140,7 @@ const DashboardHome = () => {
             Aquí está el resumen de tu actividad hoy.
           </WelcomeSubtitle>
         </WelcomeContent>
-        <PrimaryActionButton>
+        <PrimaryActionButton onClick={() => navigate('/dashboard/scan')}>
           <QrCode size={18} />
           Escanear QR
         </PrimaryActionButton>

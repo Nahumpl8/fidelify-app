@@ -2,6 +2,14 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { supabase } from '../../lib/supabase';
+import {
+  generateApplePass,
+  downloadApplePass,
+  generateGooglePass,
+  openGoogleWalletSave,
+  supportsAppleWallet,
+  supportsGoogleWallet,
+} from '../../services/wallet';
 
 /**
  * JoinPage - Registro público de clientes en un negocio específico
@@ -33,6 +41,11 @@ const JoinPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [cardData, setCardData] = useState(null);
+
+  // Estado de wallet
+  const [walletLoading, setWalletLoading] = useState({ apple: false, google: false });
+  const [walletError, setWalletError] = useState(null);
+  const [walletSuccess, setWalletSuccess] = useState({ apple: false, google: false });
 
   // Cargar datos del negocio
   useEffect(() => {
@@ -149,6 +162,50 @@ const JoinPage = () => {
     }
   };
 
+  // Handler para Apple Wallet
+  const handleAddToAppleWallet = async () => {
+    if (!cardData?.id) return;
+
+    setWalletLoading(prev => ({ ...prev, apple: true }));
+    setWalletError(null);
+
+    try {
+      const result = await generateApplePass(cardData.id);
+      if (result.success && result.downloadUrl) {
+        downloadApplePass(result.downloadUrl);
+        setWalletSuccess(prev => ({ ...prev, apple: true }));
+      } else {
+        setWalletError(result.error || 'Error al generar pase de Apple');
+      }
+    } catch (err) {
+      setWalletError('Error de conexión');
+    } finally {
+      setWalletLoading(prev => ({ ...prev, apple: false }));
+    }
+  };
+
+  // Handler para Google Wallet
+  const handleAddToGoogleWallet = async () => {
+    if (!cardData?.id) return;
+
+    setWalletLoading(prev => ({ ...prev, google: true }));
+    setWalletError(null);
+
+    try {
+      const result = await generateGooglePass(cardData.id);
+      if (result.success && result.saveUrl) {
+        openGoogleWalletSave(result.saveUrl);
+        setWalletSuccess(prev => ({ ...prev, google: true }));
+      } else {
+        setWalletError(result.error || 'Error al generar pase de Google');
+      }
+    } catch (err) {
+      setWalletError('Error de conexión');
+    } finally {
+      setWalletLoading(prev => ({ ...prev, google: false }));
+    }
+  };
+
   // Loading state
   if (loading) {
     return (
@@ -198,12 +255,35 @@ const JoinPage = () => {
             </InfoRow>
           </CardInfo>
 
-          <WalletButton>
-            Agregar a Apple Wallet
-          </WalletButton>
-          <WalletButtonAlt>
-            Agregar a Google Wallet
+          {walletError && <WalletErrorMessage>{walletError}</WalletErrorMessage>}
+
+          {supportsAppleWallet() && (
+            <WalletButton
+              onClick={handleAddToAppleWallet}
+              disabled={walletLoading.apple || walletSuccess.apple}
+            >
+              {walletLoading.apple
+                ? 'Generando...'
+                : walletSuccess.apple
+                ? '✓ Descargado'
+                : 'Agregar a Apple Wallet'}
+            </WalletButton>
+          )}
+
+          <WalletButtonAlt
+            onClick={handleAddToGoogleWallet}
+            disabled={walletLoading.google || walletSuccess.google}
+          >
+            {walletLoading.google
+              ? 'Generando...'
+              : walletSuccess.google
+              ? '✓ Agregado'
+              : 'Agregar a Google Wallet'}
           </WalletButtonAlt>
+
+          <SkipLink onClick={() => navigate('/')}>
+            Omitir por ahora
+          </SkipLink>
         </SuccessCard>
       </Container>
     );
@@ -470,10 +550,43 @@ const WalletButton = styled.button`
   font-weight: 600;
   cursor: pointer;
   margin-bottom: 10px;
+  transition: opacity 0.2s, background 0.2s;
+
+  &:hover:not(:disabled) {
+    opacity: 0.9;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
 `;
 
 const WalletButtonAlt = styled(WalletButton)`
   background: #4285f4;
+`;
+
+const WalletErrorMessage = styled.p`
+  color: #d32f2f;
+  font-size: 14px;
+  background: #ffebee;
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+`;
+
+const SkipLink = styled.button`
+  background: none;
+  border: none;
+  color: #666;
+  font-size: 14px;
+  cursor: pointer;
+  margin-top: 12px;
+  text-decoration: underline;
+
+  &:hover {
+    color: #333;
+  }
 `;
 
 export default JoinPage;

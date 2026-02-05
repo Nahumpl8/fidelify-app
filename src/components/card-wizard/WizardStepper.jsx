@@ -31,22 +31,22 @@ const StepCircle = styled.div`
     switch ($status) {
       case 'completed':
         return `
-          background: ${theme.colors.success};
+          background: #9787F3;
           color: white;
-          border: 2px solid ${theme.colors.success};
+          border: 2px solid #9787F3;
         `;
       case 'active':
         return `
-          background: ${theme.colors.primary};
+          background: linear-gradient(135deg, #9787F3 0%, #7C6AE8 100%);
           color: white;
-          border: 2px solid ${theme.colors.primary};
-          box-shadow: 0 0 15px ${theme.colors.primary}60;
+          border: 2px solid #9787F3;
+          box-shadow: 0 0 15px rgba(151, 135, 243, 0.4);
         `;
       default:
         return `
-          background: rgba(255, 255, 255, 0.05);
-          color: rgba(255, 255, 255, 0.4);
-          border: 2px solid rgba(255, 255, 255, 0.1);
+          background: ${theme.mode === 'dark' ? 'rgba(26, 23, 48, 0.6)' : 'rgba(255, 255, 255, 0.8)'};
+          color: ${theme.mode === 'dark' ? 'rgba(196, 181, 253, 0.5)' : 'rgba(101, 84, 212, 0.5)'};
+          border: 2px solid ${theme.mode === 'dark' ? 'rgba(151, 135, 243, 0.2)' : 'rgba(151, 135, 243, 0.15)'};
         `;
     }
   }}
@@ -56,7 +56,11 @@ const StepLabel = styled.span`
   font-size: ${({ theme }) => theme.fontSizes.sm};
   font-weight: 500;
   color: ${({ $active, theme }) =>
-    $active ? 'white' : 'rgba(255, 255, 255, 0.4)'};
+    $active
+      ? '#9787F3'
+      : theme.mode === 'dark'
+        ? 'rgba(196, 181, 253, 0.6)'
+        : 'rgba(101, 84, 212, 0.6)'};
   transition: color 0.3s ease;
   white-space: nowrap;
 
@@ -72,8 +76,8 @@ const StepConnector = styled.div`
     `
     width: 40px;
     height: 2px;
-    background: ${$completed ? theme.colors.success : 'rgba(255, 255, 255, 0.1)'};
-    
+    background: ${$completed ? '#9787F3' : theme.mode === 'dark' ? 'rgba(151, 135, 243, 0.2)' : 'rgba(151, 135, 243, 0.15)'};
+
     @media (max-width: ${theme.breakpoints.md}) {
       width: 20px;
     }
@@ -88,10 +92,10 @@ const StepConnector = styled.div`
     left: 15px;
     width: 2px;
     height: 20px; /* Gap spacing */
-    background: ${$completed ? theme.colors.success : 'rgba(255, 255, 255, 0.1)'};
+    background: ${$completed ? '#9787F3' : theme.mode === 'dark' ? 'rgba(151, 135, 243, 0.2)' : 'rgba(151, 135, 243, 0.15)'};
     z-index: 1;
   `}
-  
+
   transition: background 0.3s ease;
 `;
 

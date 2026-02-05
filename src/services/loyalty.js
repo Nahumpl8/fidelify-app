@@ -73,6 +73,69 @@ export async function addStamp(cardId, amount = 1, options = {}) {
 
 /**
  * ============================================================
+ * ADD POINTS FOR PURCHASE - Calcular puntos por monto de compra
+ * ============================================================
+ *
+ * Esta función calcula automáticamente los puntos/cashback basado en:
+ * - El monto de la compra
+ * - El tipo de programa (points, cashback, levels)
+ * - La configuración del negocio (points_per_currency, cashback_percentage)
+ *
+ * @param {string} cardId - UUID de la loyalty_card
+ * @param {number} purchaseAmount - Monto de la compra en moneda local
+ * @param {Object} options - Opciones adicionales
+ * @param {string} options.description - Descripción de la transacción
+ * @param {string} options.locationName - Nombre de la sucursal
+ * @param {string} options.createdBy - UUID del usuario que registra
+ * @returns {Promise<AddPointsResult>}
+ *
+ * @example
+ * const result = await addPointsForPurchase('card-uuid', 150.00, {
+ *   description: 'Compra en sucursal centro',
+ *   locationName: 'Sucursal Centro'
+ * });
+ *
+ * // result incluye:
+ * // - success: boolean
+ * // - new_balance: número de puntos actual
+ * // - calculated_points: puntos ganados en esta compra
+ * // - purchase_amount: monto de la compra
+ * // - program_type: 'points' | 'cashback' | 'levels'
+ */
+export async function addPointsForPurchase(cardId, purchaseAmount, options = {}) {
+  const { description = null, locationName = null, createdBy = null } = options;
+
+  try {
+    const { data, error } = await supabase.rpc('add_points_for_purchase', {
+      p_card_id: cardId,
+      p_purchase_amount: purchaseAmount,
+      p_description: description,
+      p_created_by: createdBy,
+      p_location_name: locationName,
+    });
+
+    if (error) {
+      console.error('[addPointsForPurchase] RPC Error:', error);
+      return {
+        success: false,
+        error: error.message,
+        error_code: error.code,
+      };
+    }
+
+    return data;
+  } catch (err) {
+    console.error('[addPointsForPurchase] Unexpected error:', err);
+    return {
+      success: false,
+      error: err.message,
+      error_code: 'UNEXPECTED_ERROR',
+    };
+  }
+}
+
+/**
+ * ============================================================
  * REDEEM REWARD - Canjear una recompensa
  * ============================================================
  *
@@ -425,6 +488,7 @@ export function formatBalance(balance, programType, targetValue) {
 
 export default {
   addStamp,
+  addPointsForPurchase,
   redeemReward,
   getCard,
   getClientCards,

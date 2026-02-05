@@ -17,22 +17,22 @@ const DockContainer = styled.div`
   border-radius: ${({ $compact }) => $compact ? '12px' : '16px'};
   margin-top: ${({ $compact }) => $compact ? '4px' : '16px'};
 
-  /* GLASS EFFECT - Theme Aware */
+  /* Glassmorphism with Violet accent */
   background: ${({ theme }) => theme.mode === 'dark'
-    ? 'rgba(30, 41, 59, 0.6)'
-    : 'rgba(255, 255, 255, 0.9)'};
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+    ? 'rgba(26, 23, 48, 0.7)'
+    : 'rgba(255, 255, 255, 0.85)'};
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
 
-  /* Border */
+  /* Border - Violet tinted */
   border: 1px solid ${({ theme }) => theme.mode === 'dark'
-    ? 'rgba(255, 255, 255, 0.08)'
-    : 'rgba(0, 0, 0, 0.08)'};
+    ? 'rgba(151, 135, 243, 0.15)'
+    : 'rgba(151, 135, 243, 0.1)'};
 
   /* Shadow */
   box-shadow: ${({ theme }) => theme.mode === 'dark'
     ? '0 4px 16px rgba(0, 0, 0, 0.25)'
-    : '0 2px 12px rgba(0, 0, 0, 0.06)'};
+    : '0 2px 12px rgba(151, 135, 243, 0.08)'};
 
   @media (max-width: 640px) {
     max-width: 100%;
@@ -50,10 +50,10 @@ const SegmentedControl = styled.div`
   border-radius: 12px;
   gap: 4px;
 
-  /* Background Track */
+  /* Background Track - Violet tinted */
   background: ${({ theme }) => theme.mode === 'dark'
-    ? 'rgba(15, 23, 42, 0.6)'
-    : 'rgba(0, 0, 0, 0.06)'};
+    ? 'rgba(26, 23, 48, 0.6)'
+    : 'rgba(151, 135, 243, 0.08)'};
 `;
 
 const SegmentButton = styled.button`
@@ -70,31 +70,31 @@ const SegmentButton = styled.button`
   cursor: pointer;
   transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
 
-  /* Active State */
+  /* Active State - Violet accent */
   background: ${({ $active, theme }) => $active
-    ? (theme.mode === 'dark' ? 'rgba(255, 255, 255, 0.12)' : '#FFFFFF')
+    ? (theme.mode === 'dark' ? 'rgba(151, 135, 243, 0.2)' : '#FFFFFF')
     : 'transparent'};
 
-  /* TEXT COLOR - CRITICAL FOR LIGHT MODE */
+  /* TEXT COLOR */
   color: ${({ $active, theme }) => {
     if ($active) {
-      return theme.mode === 'dark' ? '#F8FAFC' : '#1E293B';
+      return theme.mode === 'dark' ? '#F8FAFC' : '#9787F3';
     }
-    return theme.mode === 'dark' ? 'rgba(148, 163, 184, 0.7)' : 'rgba(71, 85, 105, 0.7)';
+    return theme.mode === 'dark' ? 'rgba(196, 181, 253, 0.7)' : 'rgba(101, 84, 212, 0.7)';
   }};
 
   /* Shadow for active button */
   box-shadow: ${({ $active, theme }) => $active
     ? (theme.mode === 'dark'
-      ? '0 2px 8px rgba(0, 0, 0, 0.3)'
-      : '0 2px 8px rgba(0, 0, 0, 0.1)')
+      ? '0 2px 8px rgba(151, 135, 243, 0.2)'
+      : '0 2px 8px rgba(151, 135, 243, 0.15)')
     : 'none'};
 
   &:hover {
     background: ${({ $active, theme }) => $active
-      ? (theme.mode === 'dark' ? 'rgba(255, 255, 255, 0.15)' : '#FFFFFF')
-      : (theme.mode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)')};
-    color: ${({ theme }) => theme.mode === 'dark' ? '#F8FAFC' : '#1E293B'};
+      ? (theme.mode === 'dark' ? 'rgba(151, 135, 243, 0.25)' : '#FFFFFF')
+      : (theme.mode === 'dark' ? 'rgba(151, 135, 243, 0.1)' : 'rgba(151, 135, 243, 0.08)')};
+    color: ${({ theme }) => theme.mode === 'dark' ? '#F8FAFC' : '#9787F3'};
   }
 
   @media (max-width: 640px) {
@@ -133,10 +133,10 @@ const SectionLabel = styled.label`
   text-align: center;
   white-space: nowrap;
 
-  /* TEXT COLOR - CRITICAL FOR LIGHT MODE */
+  /* Violet-tinted text */
   color: ${({ theme }) => theme.mode === 'dark'
-    ? 'rgba(148, 163, 184, 0.9)'
-    : 'rgba(71, 85, 105, 0.9)'};
+    ? 'rgba(196, 181, 253, 0.9)'
+    : 'rgba(101, 84, 212, 0.9)'};
 `;
 
 const SliderTrack = styled.div`
@@ -145,10 +145,10 @@ const SliderTrack = styled.div`
   height: 8px;
   border-radius: 4px;
 
-  /* Track Background */
+  /* Track Background - Violet tinted */
   background: ${({ theme }) => theme.mode === 'dark'
-    ? 'rgba(15, 23, 42, 0.8)'
-    : 'rgba(0, 0, 0, 0.08)'};
+    ? 'rgba(26, 23, 48, 0.8)'
+    : 'rgba(151, 135, 243, 0.12)'};
 `;
 
 const SliderFill = styled.div`
@@ -160,8 +160,8 @@ const SliderFill = styled.div`
   width: ${({ $progress }) => $progress}%;
   transition: width 200ms ease;
 
-  /* Always Emerald fill */
-  background: linear-gradient(90deg, #10B981, #059669);
+  /* Violet gradient fill */
+  background: linear-gradient(90deg, #9787F3, #7C6AE8);
 `;
 
 const Slider = styled.input`
@@ -184,14 +184,14 @@ const Slider = styled.input`
     cursor: grab;
     transition: transform 150ms ease, box-shadow 150ms ease;
 
-    /* Thumb styling */
+    /* Thumb styling - Violet accent */
     background: ${({ theme }) => theme.mode === 'dark' ? '#F8FAFC' : '#FFFFFF'};
-    border: 2px solid #10B981;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    border: 2px solid #9787F3;
+    box-shadow: 0 2px 8px rgba(151, 135, 243, 0.2);
 
     &:hover {
       transform: scale(1.1);
-      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+      box-shadow: 0 4px 12px rgba(151, 135, 243, 0.3);
     }
 
     &:active {
@@ -205,9 +205,9 @@ const Slider = styled.input`
     height: 22px;
     border-radius: 50%;
     cursor: grab;
-    border: 2px solid #10B981;
+    border: 2px solid #9787F3;
     background: ${({ theme }) => theme.mode === 'dark' ? '#F8FAFC' : '#FFFFFF'};
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 8px rgba(151, 135, 243, 0.2);
   }
 
   &:focus {
@@ -215,7 +215,7 @@ const Slider = styled.input`
   }
 
   &:focus-visible::-webkit-slider-thumb {
-    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.25), 0 2px 8px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 0 0 4px rgba(151, 135, 243, 0.25), 0 2px 8px rgba(0, 0, 0, 0.2);
   }
 `;
 
@@ -263,10 +263,10 @@ const MaxValue = styled.span`
   font-size: ${({ $compact }) => $compact ? '12px' : '14px'};
   font-weight: 500;
 
-  /* TEXT COLOR - CRITICAL FOR LIGHT MODE */
+  /* Violet-tinted text */
   color: ${({ theme }) => theme.mode === 'dark'
-    ? 'rgba(148, 163, 184, 0.8)'
-    : 'rgba(71, 85, 105, 0.8)'};
+    ? 'rgba(196, 181, 253, 0.8)'
+    : 'rgba(101, 84, 212, 0.7)'};
 `;
 
 const HelpText = styled.p`
@@ -275,10 +275,10 @@ const HelpText = styled.p`
   margin: 0;
   line-height: 1.4;
 
-  /* TEXT COLOR - CRITICAL FOR LIGHT MODE */
+  /* Violet-tinted text */
   color: ${({ theme }) => theme.mode === 'dark'
-    ? 'rgba(148, 163, 184, 0.6)'
-    : 'rgba(100, 116, 139, 0.8)'};
+    ? 'rgba(196, 181, 253, 0.6)'
+    : 'rgba(101, 84, 212, 0.6)'};
 `;
 
 // ============================================

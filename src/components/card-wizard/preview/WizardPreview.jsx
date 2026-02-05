@@ -58,24 +58,24 @@ const PlatformButton = styled.button`
   transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
   font-size: 20px;
 
-  /* Active/Inactive State */
+  /* Active/Inactive State - Violet accent */
   background: ${({ $active, theme }) => $active
-    ? (theme.mode === 'dark' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(16, 185, 129, 0.15)')
-    : (theme.mode === 'dark' ? 'rgba(30, 41, 59, 0.6)' : 'rgba(241, 245, 249, 0.9)')};
+    ? (theme.mode === 'dark' ? 'rgba(151, 135, 243, 0.2)' : 'rgba(151, 135, 243, 0.15)')
+    : (theme.mode === 'dark' ? 'rgba(26, 23, 48, 0.6)' : 'rgba(234, 239, 254, 0.9)')};
 
   border: 2px solid ${({ $active }) => $active
-    ? '#10B981'
+    ? '#9787F3'
     : 'transparent'};
 
   box-shadow: ${({ $active, theme }) => $active
-    ? '0 2px 8px rgba(16, 185, 129, 0.3)'
-    : (theme.mode === 'dark' ? '0 2px 8px rgba(0, 0, 0, 0.2)' : '0 2px 8px rgba(0, 0, 0, 0.06)')};
+    ? '0 2px 8px rgba(151, 135, 243, 0.3)'
+    : (theme.mode === 'dark' ? '0 2px 8px rgba(0, 0, 0, 0.2)' : '0 2px 8px rgba(151, 135, 243, 0.08)')};
 
   &:hover {
     transform: scale(1.05);
     background: ${({ $active, theme }) => $active
-      ? (theme.mode === 'dark' ? 'rgba(16, 185, 129, 0.25)' : 'rgba(16, 185, 129, 0.2)')
-      : (theme.mode === 'dark' ? 'rgba(30, 41, 59, 0.8)' : 'rgba(241, 245, 249, 1)')};
+      ? (theme.mode === 'dark' ? 'rgba(151, 135, 243, 0.25)' : 'rgba(151, 135, 243, 0.2)')
+      : (theme.mode === 'dark' ? 'rgba(45, 39, 75, 0.8)' : 'rgba(234, 239, 254, 1)')};
   }
 
   @media (max-width: 480px) {
@@ -120,7 +120,7 @@ const PhoneContainer = styled.div`
   position: relative;
   transform-style: preserve-3d;
   animation: ${float} 6s ease-in-out infinite;
-  
+
   /* Laptop Scaling for 50/50 Split */
   @media (min-width: 1025px) and (max-width: 1400px) {
     transform: scale(0.85);
@@ -135,7 +135,7 @@ const PhoneContainer = styled.div`
     transform: scale(0.9);
   }
 
-  /* Deep Ambient Glow */
+  /* Deep Ambient Glow - Violet */
   &::before {
     content: '';
     position: absolute;
@@ -146,8 +146,8 @@ const PhoneContainer = styled.div`
     height: 700px;
     background: radial-gradient(
       ellipse at center,
-      rgba(99, 102, 241, 0.25) 0%,
-      rgba(168, 85, 247, 0.15) 40%,
+      rgba(151, 135, 243, 0.3) 0%,
+      rgba(124, 106, 232, 0.18) 40%,
       transparent 70%
     );
     filter: blur(60px);
@@ -524,16 +524,17 @@ const FlipIndicator = styled.div`
   margin-top: 8px;
   animation: ${fadeIn} 0.3s ease;
 
-  /* Theme Aware Styling */
+  /* Glassmorphism with Violet accent */
   background: ${({ theme }) => theme.mode === 'dark'
-    ? 'rgba(30, 41, 59, 0.6)'
-    : 'rgba(241, 245, 249, 0.9)'};
+    ? 'rgba(26, 23, 48, 0.7)'
+    : 'rgba(234, 239, 254, 0.9)'};
   color: ${({ theme }) => theme.mode === 'dark'
-    ? 'rgba(248, 250, 252, 0.9)'
-    : 'rgba(51, 65, 85, 0.9)'};
+    ? 'rgba(196, 181, 253, 0.9)'
+    : '#9787F3'};
   border: 1px solid ${({ theme }) => theme.mode === 'dark'
-    ? 'rgba(255, 255, 255, 0.08)'
-    : 'rgba(0, 0, 0, 0.06)'};
+    ? 'rgba(151, 135, 243, 0.2)'
+    : 'rgba(151, 135, 243, 0.15)'};
+  backdrop-filter: blur(12px);
 `;
 
 const FlipIcon = styled.span`

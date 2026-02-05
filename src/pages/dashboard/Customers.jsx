@@ -64,9 +64,8 @@ const Customers = () => {
     setActionLoading(true);
 
     const { data, error } = await registerVisit({
-      customerId: selectedCustomer.id,
-      organizationId: organization.id,
-      loyaltyCardId: selectedCustomer.loyalty_card_id,
+      cardId: selectedCustomer.card_id,
+      businessId: organization.id,
       pointsToAdd,
       description: `+${pointsToAdd} puntos por visita`,
       processedBy: user.id,
@@ -101,9 +100,7 @@ const Customers = () => {
     setActionLoading(true);
 
     const { data, error } = await redeemReward({
-      customerId: selectedCustomer.id,
-      organizationId: organization.id,
-      loyaltyCardId: selectedCustomer.loyalty_card_id,
+      cardId: selectedCustomer.card_id,
       pointsToRedeem: rewardThreshold,
       description: selectedCustomer.loyalty_cards?.reward_description || 'Recompensa canjeada',
       processedBy: user.id,

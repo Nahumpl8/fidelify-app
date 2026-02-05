@@ -41,8 +41,8 @@ const float = keyframes`
 `;
 
 const pulse = keyframes`
-  0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
-  50% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(151, 135, 243, 0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(151, 135, 243, 0); }
 `;
 
 // ============================================
@@ -55,23 +55,23 @@ const LayoutWrapper = styled.div`
   display: flex;
   overflow: hidden;
   background: ${({ theme }) => theme.mode === 'dark'
-    ? 'linear-gradient(135deg, #020617 0%, #0F172A 30%, #1E1B4B 60%, #0F172A 100%)'
-    : 'linear-gradient(135deg, #F8FAFC 0%, #E2E8F0 100%)'};
-  
-  /* Subtle animated gradient overlay */
+    ? 'linear-gradient(135deg, #1A1730 0%, #2D274B 30%, #1E1B4B 60%, #1A1730 100%)'
+    : 'linear-gradient(135deg, #EAEFFE 0%, #E0E5FF 50%, #F5F3FF 100%)'};
+
+  /* Subtle animated gradient overlay - Violet */
   &::before {
     content: '';
     position: absolute;
     inset: 0;
     background: ${({ theme }) => theme.mode === 'dark'
-    ? 'radial-gradient(ellipse 80% 50% at 50% -20%, rgba(16, 185, 129, 0.08) 0%, transparent 60%)'
-    : 'none'};
+    ? 'radial-gradient(ellipse 80% 50% at 50% -20%, rgba(151, 135, 243, 0.12) 0%, transparent 60%)'
+    : 'radial-gradient(ellipse 80% 50% at 50% -20%, rgba(151, 135, 243, 0.08) 0%, transparent 60%)'};
     pointer-events: none;
   }
 `;
 
 // ============================================
-// FLOATING RAIL WITH DARK GLASS EFFECT (PILAR 2)
+// FLOATING RAIL WITH VIOLET GLASS EFFECT
 // ============================================
 const FloatingRail = styled.nav`
   position: fixed;
@@ -88,29 +88,29 @@ const FloatingRail = styled.nav`
   width: 76px;
   padding: 20px 12px;
 
-  /* DARK GLASS EFFECT - Slate 800 very transparent */
+  /* Premium Glassmorphism - Violet accent */
   background: ${({ theme }) => theme.mode === 'dark'
-    ? 'rgba(30, 41, 59, 0.4)'
-    : 'rgba(255, 255, 255, 0.85)'};
-  backdrop-filter: blur(24px) saturate(120%);
-  -webkit-backdrop-filter: blur(24px) saturate(120%);
+    ? 'rgba(26, 23, 48, 0.85)'
+    : 'rgba(255, 255, 255, 0.75)'};
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
 
-  /* Subtle light border */
+  /* Violet-tinted border */
   border: 1px solid ${({ theme }) => theme.mode === 'dark'
-    ? 'rgba(255, 255, 255, 0.05)'
-    : 'rgba(0, 0, 0, 0.08)'};
+    ? 'rgba(151, 135, 243, 0.15)'
+    : 'rgba(151, 135, 243, 0.2)'};
   border-radius: 40px;
 
-  /* Premium depth shadows with inner top light */
+  /* Premium depth shadows with violet glow */
   box-shadow:
     0 4px 6px -1px rgba(0, 0, 0, 0.1),
     0 2px 4px -1px rgba(0, 0, 0, 0.06),
     inset 0 1px 0 0 ${({ theme }) => theme.mode === 'dark'
-      ? 'rgba(255, 255, 255, 0.05)'
+      ? 'rgba(151, 135, 243, 0.1)'
       : 'rgba(255, 255, 255, 0.8)'},
     0 20px 40px ${({ theme }) => theme.mode === 'dark'
       ? 'rgba(0, 0, 0, 0.4)'
-      : 'rgba(0, 0, 0, 0.1)'};
+      : 'rgba(151, 135, 243, 0.1)'};
 
   /* Subtle gradient highlight overlay */
   &::before {
@@ -119,7 +119,7 @@ const FloatingRail = styled.nav`
     inset: 0;
     border-radius: 40px;
     background: ${({ theme }) => theme.mode === 'dark'
-      ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, transparent 50%)'
+      ? 'linear-gradient(135deg, rgba(151, 135, 243, 0.05) 0%, transparent 50%)'
       : 'linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, transparent 50%)'};
     pointer-events: none;
   }
@@ -148,8 +148,8 @@ const RailLogo = styled.button`
   border: none;
   cursor: pointer;
 
-  /* ALWAYS Emerald - Never client color */
-  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  /* Violet gradient */
+  background: linear-gradient(135deg, #9787F3 0%, #7C6AE8 100%);
   border-radius: 14px;
 
   font-size: 20px;
@@ -158,7 +158,7 @@ const RailLogo = styled.button`
   letter-spacing: -0.5px;
 
   box-shadow:
-    0 4px 12px rgba(16, 185, 129, 0.4),
+    0 4px 12px rgba(151, 135, 243, 0.4),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
 
   transition: all 0.2s ease;
@@ -172,12 +172,12 @@ const RailLogo = styled.button`
     width: 14px;
     height: 14px;
     background: ${({ theme }) => theme.mode === 'dark'
-      ? 'rgba(30, 41, 59, 0.95)'
+      ? 'rgba(26, 23, 48, 0.95)'
       : 'rgba(255, 255, 255, 0.95)'};
     border-radius: 4px;
     border: 1px solid ${({ theme }) => theme.mode === 'dark'
-      ? 'rgba(255, 255, 255, 0.1)'
-      : 'rgba(0, 0, 0, 0.1)'};
+      ? 'rgba(151, 135, 243, 0.2)'
+      : 'rgba(151, 135, 243, 0.15)'};
     display: flex;
     align-items: center;
     justify-content: center;
@@ -204,7 +204,7 @@ const RailLogo = styled.button`
   &:hover {
     transform: scale(1.05);
     box-shadow:
-      0 6px 16px rgba(16, 185, 129, 0.5),
+      0 6px 16px rgba(151, 135, 243, 0.5),
       inset 0 1px 0 rgba(255, 255, 255, 0.2);
   }
 `;
@@ -214,26 +214,27 @@ const LogoDropdown = styled.div`
   left: calc(100% + 12px);
   top: 0;
   z-index: 200;
-  
+
   min-width: 180px;
   padding: 8px;
-  
+
+  /* Glassmorphism with violet accent */
   background: ${({ theme }) => theme.mode === 'dark'
-    ? 'rgba(15, 23, 42, 0.95)'
-    : 'rgba(255, 255, 255, 0.98)'};
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+    ? 'rgba(26, 23, 48, 0.95)'
+    : 'rgba(255, 255, 255, 0.95)'};
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
   border: 1px solid ${({ theme }) => theme.mode === 'dark'
-    ? 'rgba(255, 255, 255, 0.1)'
-    : 'rgba(0, 0, 0, 0.1)'};
+    ? 'rgba(151, 135, 243, 0.2)'
+    : 'rgba(151, 135, 243, 0.15)'};
   border-radius: 16px;
-  
-  box-shadow: 
+
+  box-shadow:
     0 10px 40px rgba(0, 0, 0, 0.3),
     0 0 0 1px ${({ theme }) => theme.mode === 'dark'
-    ? 'rgba(255, 255, 255, 0.05)'
-    : 'rgba(0, 0, 0, 0.03)'};
-  
+    ? 'rgba(151, 135, 243, 0.1)'
+    : 'rgba(151, 135, 243, 0.05)'};
+
   animation: ${fadeInScale} 0.15s ease-out;
   transform-origin: left top;
 `;
@@ -249,32 +250,37 @@ const DropdownItem = styled.button`
   background: transparent;
   cursor: pointer;
   transition: all 0.15s ease;
-  
+
   font-size: 13px;
   font-weight: 500;
   color: ${({ theme }) => theme.colors.text.secondary};
-  
+
   svg {
     opacity: 0.7;
   }
-  
+
   &:hover {
     background: ${({ theme }) => theme.mode === 'dark'
-    ? 'rgba(255, 255, 255, 0.08)'
-    : 'rgba(0, 0, 0, 0.05)'};
+    ? 'rgba(151, 135, 243, 0.15)'
+    : 'rgba(151, 135, 243, 0.1)'};
     color: ${({ theme }) => theme.colors.text.primary};
-    
+
     svg {
       opacity: 1;
+      color: #9787F3;
     }
   }
-  
+
   ${({ $danger }) => $danger && css`
     color: #EF4444;
-    
+
     &:hover {
       background: rgba(239, 68, 68, 0.1);
       color: #EF4444;
+
+      svg {
+        color: #EF4444;
+      }
     }
   `}
 `;
@@ -282,8 +288,8 @@ const DropdownItem = styled.button`
 const DropdownDivider = styled.div`
   height: 1px;
   background: ${({ theme }) => theme.mode === 'dark'
-    ? 'rgba(255, 255, 255, 0.08)'
-    : 'rgba(0, 0, 0, 0.08)'};
+    ? 'rgba(151, 135, 243, 0.15)'
+    : 'rgba(151, 135, 243, 0.1)'};
   margin: 6px 0;
 `;
 
@@ -291,8 +297,8 @@ const RailDivider = styled.div`
   width: 24px;
   height: 1px;
   background: ${({ theme }) => theme.mode === 'dark'
-    ? 'rgba(255, 255, 255, 0.1)'
-    : 'rgba(0, 0, 0, 0.1)'};
+    ? 'rgba(151, 135, 243, 0.2)'
+    : 'rgba(151, 135, 243, 0.15)'};
   margin: 8px 0 16px;
 `;
 
@@ -322,29 +328,29 @@ const StepCircle = styled.button`
   height: 40px;
   border-radius: 50%;
 
-  /* ALWAYS Emerald for active/completed - Never client color */
+  /* Violet for active/completed */
   border: 2px solid ${({ $active, $completed, theme }) =>
     $active || $completed
-      ? '#10B981'
+      ? '#9787F3'
       : theme.mode === 'dark'
-        ? 'rgba(255, 255, 255, 0.1)'
-        : 'rgba(0, 0, 0, 0.1)'};
+        ? 'rgba(151, 135, 243, 0.2)'
+        : 'rgba(151, 135, 243, 0.15)'};
 
   background: ${({ $active, $completed, theme }) =>
     $completed
-      ? '#10B981'
+      ? '#9787F3'
       : $active
-        ? 'linear-gradient(135deg, #10B981 0%, #059669 100%)'
+        ? 'linear-gradient(135deg, #9787F3 0%, #7C6AE8 100%)'
         : theme.mode === 'dark'
-          ? 'rgba(15, 23, 42, 0.6)'
+          ? 'rgba(26, 23, 48, 0.6)'
           : 'rgba(255, 255, 255, 0.8)'};
 
   color: ${({ $active, $completed, theme }) =>
     $active || $completed
       ? 'white'
       : theme.mode === 'dark'
-        ? 'rgba(248, 250, 252, 0.4)'
-        : 'rgba(0, 0, 0, 0.4)'};
+        ? 'rgba(196, 181, 253, 0.6)'
+        : 'rgba(45, 39, 75, 0.5)'};
 
   font-size: 14px;
   font-weight: 600;
@@ -357,14 +363,14 @@ const StepCircle = styled.button`
 
   ${({ $active }) => $active && css`
     box-shadow:
-      0 0 0 4px rgba(16, 185, 129, 0.15),
-      0 4px 12px rgba(16, 185, 129, 0.35);
+      0 0 0 4px rgba(151, 135, 243, 0.2),
+      0 4px 12px rgba(151, 135, 243, 0.35);
   `}
 
   &:hover:not(:disabled) {
     transform: ${({ $completed }) => ($completed ? 'scale(1.1)' : 'none')};
     ${({ $completed }) => $completed && css`
-      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.25);
+      box-shadow: 0 0 0 4px rgba(151, 135, 243, 0.25);
     `}
   }
 
@@ -380,14 +386,14 @@ const StepLabel = styled.span`
   letter-spacing: 0.3px;
   text-align: center;
 
-  /* ALWAYS Emerald for active state - Never client color */
+  /* Violet for active state */
   color: ${({ $active, theme }) => {
     if ($active) {
-      return '#10B981'; // Emerald 500 - Both modes
+      return '#9787F3'; // Violet - Both modes
     } else if (theme.mode === 'dark') {
-      return 'rgba(148, 163, 184, 0.6)'; // Slate 400 dimmed
+      return 'rgba(196, 181, 253, 0.6)'; // Light violet dimmed
     } else {
-      return 'rgba(71, 85, 105, 0.7)'; // Slate 600 dimmed
+      return 'rgba(101, 84, 212, 0.7)'; // Violet dimmed
     }
   }};
   transition: color 0.2s ease;
@@ -399,10 +405,10 @@ const StepLine = styled.div`
   margin: 4px 0;
   background: ${({ $completed, theme }) =>
     $completed
-      ? theme.colors.primary
+      ? '#9787F3'
       : theme.mode === 'dark'
-        ? 'rgba(255, 255, 255, 0.1)'
-        : 'rgba(0, 0, 0, 0.1)'};
+        ? 'rgba(151, 135, 243, 0.2)'
+        : 'rgba(151, 135, 243, 0.15)'};
   transition: background 0.3s ease;
 `;
 
@@ -417,8 +423,8 @@ const RailFooter = styled.div`
   margin-top: 16px;
   padding-top: 16px;
   border-top: 1px solid ${({ theme }) => theme.mode === 'dark'
-    ? 'rgba(255, 255, 255, 0.08)'
-    : 'rgba(0, 0, 0, 0.08)'};
+    ? 'rgba(151, 135, 243, 0.15)'
+    : 'rgba(151, 135, 243, 0.1)'};
 `;
 
 const NavButton = styled.button`
@@ -435,17 +441,17 @@ const NavButton = styled.button`
   ${({ $variant, theme }) =>
     $variant === 'primary'
       ? css`
-          /* ALWAYS Emerald gradient - Never client color */
-          background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+          /* Violet gradient */
+          background: linear-gradient(135deg, #9787F3 0%, #7C6AE8 100%);
           color: white;
           box-shadow:
-            0 4px 12px rgba(16, 185, 129, 0.4),
+            0 4px 12px rgba(151, 135, 243, 0.4),
             inset 0 1px 0 rgba(255, 255, 255, 0.2);
 
           &:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow:
-              0 6px 20px rgba(16, 185, 129, 0.5),
+              0 6px 20px rgba(151, 135, 243, 0.5),
               inset 0 1px 0 rgba(255, 255, 255, 0.2);
           }
 
@@ -454,24 +460,23 @@ const NavButton = styled.button`
           }
         `
       : css`
-          /* Secondary: Slate glass style */
+          /* Secondary: Violet glass style */
           background: ${theme.mode === 'dark'
-            ? 'rgba(15, 23, 42, 0.6)'
-            : 'rgba(241, 245, 249, 0.8)'};
+            ? 'rgba(26, 23, 48, 0.6)'
+            : 'rgba(234, 239, 254, 0.8)'};
           color: ${theme.mode === 'dark'
-            ? 'rgba(148, 163, 184, 0.8)'
-            : 'rgba(71, 85, 105, 0.8)'};
+            ? 'rgba(196, 181, 253, 0.8)'
+            : 'rgba(101, 84, 212, 0.8)'};
           border: 1px solid ${theme.mode === 'dark'
-            ? 'rgba(255, 255, 255, 0.05)'
-            : 'rgba(0, 0, 0, 0.06)'};
+            ? 'rgba(151, 135, 243, 0.15)'
+            : 'rgba(151, 135, 243, 0.1)'};
 
           &:hover:not(:disabled) {
             background: ${theme.mode === 'dark'
-              ? 'rgba(30, 41, 59, 0.8)'
-              : 'rgba(226, 232, 240, 0.9)'};
-            color: ${theme.mode === 'dark'
-              ? 'rgba(248, 250, 252, 0.9)'
-              : 'rgba(30, 41, 59, 0.9)'};
+              ? 'rgba(45, 39, 75, 0.8)'
+              : 'rgba(234, 239, 254, 0.95)'};
+            color: #9787F3;
+            border-color: rgba(151, 135, 243, 0.3);
           }
         `}
 
@@ -504,17 +509,17 @@ const ContentScroll = styled.div`
   overflow-y: auto;
   padding: 40px;
   padding-bottom: 120px;
-  
-  /* Custom scrollbar */
+
+  /* Custom scrollbar - Violet accent */
   &::-webkit-scrollbar { width: 6px; }
   &::-webkit-scrollbar-track { background: transparent; }
   &::-webkit-scrollbar-thumb {
     background: ${({ theme }) => theme.mode === 'dark'
-    ? 'rgba(255, 255, 255, 0.1)'
-    : 'rgba(0, 0, 0, 0.1)'};
+    ? 'rgba(151, 135, 243, 0.2)'
+    : 'rgba(151, 135, 243, 0.15)'};
     border-radius: 3px;
   }
-  
+
   @media (max-width: 1024px) {
     padding: 24px 16px;
     padding-top: 80px;
@@ -542,32 +547,32 @@ const RightPanel = styled.aside`
   position: sticky;
   top: 0;
   flex-shrink: 0;
-  
+
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 40px 24px;
   overflow-y: auto;
-  
-  /* Subtle gradient overlay */
+
+  /* Violet gradient overlay */
   background: ${({ theme }) => theme.mode === 'dark'
-    ? 'linear-gradient(270deg, rgba(15, 187, 130, 0.25) 0%, transparent 100%)'
-    : 'linear-gradient(270deg, rgba(16, 185, 129, 0.05) 0%, transparent 100%)'};
-  
-  /* Custom scrollbar for small screens */
+    ? 'linear-gradient(270deg, rgba(151, 135, 243, 0.15) 0%, transparent 100%)'
+    : 'linear-gradient(270deg, rgba(151, 135, 243, 0.08) 0%, transparent 100%)'};
+
+  /* Custom scrollbar - Violet accent */
   &::-webkit-scrollbar { width: 4px; }
   &::-webkit-scrollbar-track { background: transparent; }
   &::-webkit-scrollbar-thumb {
-    background: rgba(16, 185, 129, 0.2);
+    background: rgba(151, 135, 243, 0.2);
     border-radius: 2px;
   }
-  
+
   @media (max-width: 1280px) {
     width: 380px;
     min-width: 380px;
     padding: 24px 16px;
   }
-  
+
   @media (max-width: 1024px) {
     display: none;
   }
@@ -597,7 +602,7 @@ const PreviewContainer = styled.div`
 // ============================================
 const MobileHeader = styled.header`
   display: none;
-  
+
   @media (max-width: 1024px) {
     display: flex;
     position: fixed;
@@ -605,19 +610,20 @@ const MobileHeader = styled.header`
     left: 0;
     right: 0;
     z-index: 100;
-    
+
     align-items: center;
     justify-content: space-between;
     padding: 12px 16px;
-    
+
+    /* Glassmorphism with violet accent */
     background: ${({ theme }) => theme.mode === 'dark'
-    ? 'rgba(2, 6, 23, 0.95)'
-    : 'rgba(255, 255, 255, 0.95)'};
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    ? 'rgba(26, 23, 48, 0.95)'
+    : 'rgba(255, 255, 255, 0.9)'};
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
     border-bottom: 1px solid ${({ theme }) => theme.mode === 'dark'
-    ? 'rgba(255, 255, 255, 0.08)'
-    : 'rgba(0, 0, 0, 0.08)'};
+    ? 'rgba(151, 135, 243, 0.15)'
+    : 'rgba(151, 135, 243, 0.1)'};
   }
 `;
 
@@ -630,11 +636,8 @@ const MobileLogo = styled.div`
 const MobileLogoIcon = styled.button`
   width: 32px;
   height: 32px;
-  /* ALWAYS Emerald - Never client color */
-  background: ${({ theme }) =>
-    theme.mode === 'dark'
-      ? 'linear-gradient(135deg, #10B981 0%, #059669 100%)'
-      : 'linear-gradient(135deg, #10B981 0%, #059669 100%)'};
+  /* Violet gradient */
+  background: linear-gradient(135deg, #9787F3 0%, #7C6AE8 100%);
   border-radius: 8px;
   border: none;
   display: flex;
@@ -645,7 +648,7 @@ const MobileLogoIcon = styled.button`
   color: white;
   cursor: pointer;
   transition: transform 0.2s ease;
-  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 2px 8px rgba(151, 135, 243, 0.3);
 
   &:hover {
     transform: scale(1.05);
@@ -668,13 +671,13 @@ const MobileStepDot = styled.div`
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  /* ALWAYS Emerald for active/completed - Never client color */
+  /* Violet for active/completed */
   background: ${({ $active, $completed, theme }) =>
     $completed || $active
-      ? '#10B981'
+      ? '#9787F3'
       : theme.mode === 'dark'
-        ? 'rgba(148, 163, 184, 0.3)'
-        : 'rgba(100, 116, 139, 0.3)'};
+        ? 'rgba(196, 181, 253, 0.3)'
+        : 'rgba(151, 135, 243, 0.3)'};
   transition: all 0.2s ease;
 
   ${({ $active }) => $active && css`
@@ -688,7 +691,7 @@ const MobileStepDot = styled.div`
 // ============================================
 const MobileFooter = styled.footer`
   display: none;
-  
+
   @media (max-width: 1024px) {
     display: flex;
     position: fixed;
@@ -696,20 +699,21 @@ const MobileFooter = styled.footer`
     left: 0;
     right: 0;
     z-index: 100;
-    
+
     align-items: center;
     gap: 12px;
     padding: 12px 16px;
     padding-bottom: max(12px, env(safe-area-inset-bottom));
-    
+
+    /* Glassmorphism with violet accent */
     background: ${({ theme }) => theme.mode === 'dark'
-    ? 'rgba(2, 6, 23, 0.98)'
-    : 'rgba(255, 255, 255, 0.98)'};
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    ? 'rgba(26, 23, 48, 0.98)'
+    : 'rgba(255, 255, 255, 0.95)'};
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
     border-top: 1px solid ${({ theme }) => theme.mode === 'dark'
-    ? 'rgba(255, 255, 255, 0.08)'
-    : 'rgba(0, 0, 0, 0.08)'};
+    ? 'rgba(151, 135, 243, 0.15)'
+    : 'rgba(151, 135, 243, 0.1)'};
   }
 `;
 
@@ -730,32 +734,33 @@ const MobileNavButton = styled.button`
   ${({ $primary, theme }) =>
     $primary
       ? css`
-          /* ALWAYS Emerald - Never client color */
-          background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+          /* Violet gradient */
+          background: linear-gradient(135deg, #9787F3 0%, #7C6AE8 100%);
           color: white;
-          box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+          box-shadow: 0 4px 12px rgba(151, 135, 243, 0.35);
 
           &:hover:not(:disabled) {
             transform: translateY(-1px);
-            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.45);
+            box-shadow: 0 6px 16px rgba(151, 135, 243, 0.45);
           }
         `
       : css`
-          /* Secondary: Slate glass style */
+          /* Secondary: Violet glass style */
           background: ${theme.mode === 'dark'
-            ? 'rgba(15, 23, 42, 0.6)'
-            : 'rgba(241, 245, 249, 0.9)'};
+            ? 'rgba(26, 23, 48, 0.6)'
+            : 'rgba(234, 239, 254, 0.9)'};
           color: ${theme.mode === 'dark'
-            ? 'rgba(148, 163, 184, 0.9)'
-            : 'rgba(71, 85, 105, 0.9)'};
+            ? 'rgba(196, 181, 253, 0.9)'
+            : 'rgba(101, 84, 212, 0.9)'};
           border: 1px solid ${theme.mode === 'dark'
-            ? 'rgba(255, 255, 255, 0.05)'
-            : 'rgba(0, 0, 0, 0.06)'};
+            ? 'rgba(151, 135, 243, 0.15)'
+            : 'rgba(151, 135, 243, 0.1)'};
 
           &:hover:not(:disabled) {
             background: ${theme.mode === 'dark'
-              ? 'rgba(30, 41, 59, 0.8)'
-              : 'rgba(226, 232, 240, 1)'};
+              ? 'rgba(45, 39, 75, 0.8)'
+              : 'rgba(234, 239, 254, 1)'};
+            color: #9787F3;
           }
         `}
 
@@ -772,18 +777,18 @@ const PreviewFAB = styled.button`
   border-radius: 16px;
   border: none;
   background: ${({ theme }) => theme.mode === 'dark'
-    ? 'rgba(16, 185, 129, 0.15)'
-    : 'rgba(16, 185, 129, 0.1)'};
-  color: ${({ theme }) => theme.colors.primary};
+    ? 'rgba(151, 135, 243, 0.2)'
+    : 'rgba(151, 135, 243, 0.15)'};
+  color: #9787F3;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
   animation: ${pulse} 2s ease-in-out infinite;
-  
+
   &:hover {
-    background: ${({ theme }) => theme.colors.primary};
+    background: linear-gradient(135deg, #9787F3 0%, #7C6AE8 100%);
     color: white;
     animation: none;
   }
@@ -859,8 +864,8 @@ const MobileMenuOverlay = styled.div`
   inset: 0;
   z-index: 400;
   background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   animation: ${fadeIn} 0.15s ease-out;
 `;
 
@@ -872,18 +877,19 @@ const MobileMenuDrawer = styled.div`
   width: 280px;
   max-width: 80vw;
   z-index: 401;
-  
+
+  /* Glassmorphism with violet accent */
   background: ${({ theme }) => theme.mode === 'dark'
-    ? 'rgba(15, 23, 42, 0.98)'
+    ? 'rgba(26, 23, 48, 0.98)'
     : 'rgba(255, 255, 255, 0.98)'};
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+
   padding: 24px 16px;
   padding-top: max(24px, env(safe-area-inset-top));
-  
+
   animation: ${fadeIn} 0.2s ease-out;
-  
+
   display: flex;
   flex-direction: column;
 `;
@@ -895,15 +901,15 @@ const MobileMenuHeader = styled.div`
   padding-bottom: 20px;
   margin-bottom: 16px;
   border-bottom: 1px solid ${({ theme }) => theme.mode === 'dark'
-    ? 'rgba(255, 255, 255, 0.08)'
-    : 'rgba(0, 0, 0, 0.08)'};
+    ? 'rgba(151, 135, 243, 0.15)'
+    : 'rgba(151, 135, 243, 0.1)'};
 `;
 
 const MobileMenuLogo = styled.div`
   width: 44px;
   height: 44px;
-  /* ALWAYS Emerald - Never client color */
-  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  /* Violet gradient */
+  background: linear-gradient(135deg, #9787F3 0%, #7C6AE8 100%);
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -911,7 +917,7 @@ const MobileMenuLogo = styled.div`
   font-weight: 800;
   font-size: 18px;
   color: white;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 4px 12px rgba(151, 135, 243, 0.3);
 `;
 
 const MobileMenuTitle = styled.div`
@@ -942,31 +948,36 @@ const MobileMenuItem = styled.button`
   background: transparent;
   cursor: pointer;
   transition: all 0.15s ease;
-  
+
   font-size: 15px;
   font-weight: 500;
   color: ${({ theme }) => theme.colors.text.primary};
-  
+
   svg {
     opacity: 0.6;
   }
-  
+
   &:hover {
     background: ${({ theme }) => theme.mode === 'dark'
-    ? 'rgba(255, 255, 255, 0.05)'
-    : 'rgba(0, 0, 0, 0.05)'};
-    
+    ? 'rgba(151, 135, 243, 0.15)'
+    : 'rgba(151, 135, 243, 0.1)'};
+
     svg {
       opacity: 1;
+      color: #9787F3;
     }
   }
-  
+
   ${({ $danger }) => $danger && css`
     color: #EF4444;
     margin-top: auto;
-    
+
     &:hover {
       background: rgba(239, 68, 68, 0.1);
+
+      svg {
+        color: #EF4444;
+      }
     }
   `}
 `;
