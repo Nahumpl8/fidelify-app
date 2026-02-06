@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { supabase } from '../../lib/supabase';
 import {
@@ -37,6 +37,8 @@ const JoinPage = () => {
     email: '',
     phone: '',
     birthday: '',
+    password: '',
+    confirmPassword: '',
   });
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -88,30 +90,70 @@ const JoinPage = () => {
     setSubmitting(true);
     setError(null);
 
+    // Validar contraseña
+    if (!formData.password || formData.password.length < 6) {
+      setError('La contraseña debe tener al menos 6 caracteres');
+      setSubmitting(false);
+      return;
+    }
+    if (formData.password !== formData.confirmPassword) {
+      setError('Las contraseñas no coinciden');
+      setSubmitting(false);
+      return;
+    }
+
     try {
-      // 1. Crear o encontrar el cliente
-      let clientId;
+      // 1. Crear cuenta de auth con rol de cliente
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            role: 'client',
+            full_name: formData.full_name,
+          },
+        },
+      });
 
-      // Buscar si ya existe por email
-      if (formData.email) {
-        const { data: existingClient } = await supabase
-          .from('clients')
-          .select('id')
-          .ilike('email', formData.email)
-          .single();
-
-        if (existingClient) {
-          clientId = existingClient.id;
+      if (authError) {
+        if (authError.message.includes('already registered')) {
+          setError('Ya existe una cuenta con este email. Inicia sesión en el portal.');
+          setSubmitting(false);
+          return;
         }
+        throw authError;
       }
 
-      // Si no existe, crear nuevo cliente
-      if (!clientId) {
+      const userId = authData.user.id;
+
+      // 2. Buscar si ya existe client por email y linkear
+      let clientId;
+      const { data: existingClient } = await supabase
+        .from('clients')
+        .select('id')
+        .ilike('email', formData.email)
+        .single();
+
+      if (existingClient) {
+        // Linkear auth_user_id al client existente
+        await supabase
+          .from('clients')
+          .update({
+            auth_user_id: userId,
+            full_name: formData.full_name,
+            phone: formData.phone || null,
+            birthday: formData.birthday || null,
+          })
+          .eq('id', existingClient.id);
+        clientId = existingClient.id;
+      } else {
+        // Crear nuevo client con auth_user_id
         const { data: newClient, error: clientError } = await supabase
           .from('clients')
           .insert({
+            auth_user_id: userId,
             full_name: formData.full_name,
-            email: formData.email || null,
+            email: formData.email,
             phone: formData.phone || null,
             birthday: formData.birthday || null,
           })
@@ -122,7 +164,7 @@ const JoinPage = () => {
         clientId = newClient.id;
       }
 
-      // 2. Verificar si ya tiene tarjeta en este negocio
+      // 3. Verificar si ya tiene tarjeta en este negocio
       const { data: existingCard } = await supabase
         .from('loyalty_cards')
         .select('*')
@@ -130,29 +172,24 @@ const JoinPage = () => {
         .eq('client_id', clientId)
         .single();
 
-      if (existingCard) {
-        // Ya tiene tarjeta, mostrar éxito con datos existentes
-        setCardData(existingCard);
-        setSuccess(true);
-        return;
+      if (!existingCard) {
+        // 4. Crear la tarjeta de lealtad
+        await supabase
+          .from('loyalty_cards')
+          .insert({
+            business_id: business.id,
+            client_id: clientId,
+            acquisition_source: 'web',
+            acquisition_medium: 'join_page',
+          });
       }
 
-      // 3. Crear la tarjeta de lealtad
-      const { data: newCard, error: cardError } = await supabase
-        .from('loyalty_cards')
-        .insert({
-          business_id: business.id,
-          client_id: clientId,
-          acquisition_source: 'web',
-          acquisition_medium: 'join_page',
-        })
-        .select()
-        .single();
-
-      if (cardError) throw cardError;
-
-      setCardData(newCard);
-      setSuccess(true);
+      // 5. Redirigir al portal del cliente
+      navigate('/portal', {
+        state: {
+          welcomeMessage: `¡Bienvenido a ${business.name}! Tu cuenta ha sido creada.`,
+        },
+      });
 
     } catch (err) {
       console.error('Error al registrar:', err);
@@ -352,6 +389,32 @@ const JoinPage = () => {
             />
           </InputGroup>
 
+          <InputGroup>
+            <Label>Contraseña *</Label>
+            <Input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+              placeholder="Mínimo 6 caracteres"
+              autoComplete="new-password"
+            />
+          </InputGroup>
+
+          <InputGroup>
+            <Label>Confirmar contraseña *</Label>
+            <Input
+              type="password"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              required
+              placeholder="Repite tu contraseña"
+              autoComplete="new-password"
+            />
+          </InputGroup>
+
           {error && <ErrorMessage>{error}</ErrorMessage>}
 
           <SubmitButton
@@ -363,6 +426,9 @@ const JoinPage = () => {
           </SubmitButton>
         </Form>
 
+        <Terms>
+          ¿Ya tienes cuenta? <LoginLink to="/client/login">Inicia sesión aquí</LoginLink>
+        </Terms>
         <Terms>
           Al registrarte aceptas recibir comunicaciones de {business?.name} sobre
           tu programa de lealtad.
@@ -573,6 +639,16 @@ const WalletErrorMessage = styled.p`
   padding: 10px;
   border-radius: 6px;
   margin-bottom: 12px;
+`;
+
+const LoginLink = styled(Link)`
+  color: #667eea;
+  font-weight: 600;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
 `;
 
 const SkipLink = styled.button`

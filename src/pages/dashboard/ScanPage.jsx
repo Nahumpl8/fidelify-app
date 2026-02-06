@@ -22,6 +22,7 @@ import { useNavigate } from 'react-router-dom';
 import { useOrganization } from '../../context/OrganizationContext';
 import { useAuth } from '../../context/AuthContext';
 import { getCard, addStamp, addPointsForPurchase, redeemReward } from '../../services/loyalty';
+import { updateGooglePass } from '../../services/wallet';
 
 /**
  * ScanPage - Escáner QR Premium con Glassmorphism
@@ -160,6 +161,11 @@ const ScanPage = () => {
           ...prev,
           current_balance: result.new_balance,
         }));
+
+        // Update Google Wallet pass if linked
+        if (scannedCard.google_object_id) {
+          updateGooglePass(scannedCard.id).catch(console.error);
+        }
       } else {
         throw new Error(result.error || 'Error al agregar sello');
       }
@@ -204,6 +210,11 @@ const ScanPage = () => {
           current_balance: result.new_balance,
         }));
         setPurchaseAmount('');
+
+        // Update Google Wallet pass if linked
+        if (scannedCard.google_object_id) {
+          updateGooglePass(scannedCard.id).catch(console.error);
+        }
       } else {
         throw new Error(result.error || 'Error al registrar compra');
       }
@@ -246,6 +257,11 @@ const ScanPage = () => {
           ...prev,
           current_balance: result.new_balance,
         }));
+
+        // Update Google Wallet pass if linked
+        if (scannedCard.google_object_id) {
+          updateGooglePass(scannedCard.id).catch(console.error);
+        }
       } else {
         throw new Error(result.error || 'Error al canjear');
       }

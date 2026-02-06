@@ -43,7 +43,7 @@ export async function generateApplePass(cardId) {
           ? `Bearer ${session.access_token}`
           : '',
       },
-      body: JSON.stringify({ cardId, platform: 'apple' }),
+      body: JSON.stringify({ cardId }),
     });
 
     const data = await response.json();
@@ -112,7 +112,7 @@ export async function generateGooglePass(cardId) {
           ? `Bearer ${session.access_token}`
           : '',
       },
-      body: JSON.stringify({ cardId, platform: 'google' }),
+      body: JSON.stringify({ cardId }),
     });
 
     const data = await response.json();
@@ -141,6 +141,80 @@ export function openGoogleWalletSave(saveUrl) {
   }
 
   window.open(saveUrl, '_blank', 'noopener,noreferrer');
+}
+
+/**
+ * ============================================================
+ * PREVIEW / WIZARD
+ * ============================================================
+ */
+
+/**
+ * Generate a preview Google Wallet pass from wizard config
+ * No database lookup - uses provided config directly
+ *
+ * @param {Object} config - Wizard configuration
+ * @param {string} config.businessName - Business name
+ * @param {string} config.programName - Program name
+ * @param {string} config.programType - 'stamp', 'points', 'cashback'
+ * @param {string} config.logoUrl - Logo URL (optional)
+ * @param {string} config.backgroundColor - Hex color
+ * @param {number} config.targetValue - Target stamps/points
+ * @param {string} config.rewardText - Reward description
+ * @param {number} config.currentBalance - Demo balance for preview
+ * @returns {Promise<{success: boolean, saveUrl?: string, error?: string}>}
+ */
+export async function previewGooglePass(config) {
+  try {
+    const response = await fetch(`${FUNCTIONS_URL}/preview-google-pass`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(config),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to generate preview');
+    }
+
+    return data;
+  } catch (error) {
+    console.error('[previewGooglePass] Error:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Update an existing Google Wallet pass
+ * Called after balance changes (stamps, points, purchases)
+ *
+ * @param {string} cardId - UUID de la loyalty_card
+ * @returns {Promise<{success: boolean, newBalance?: number, error?: string}>}
+ */
+export async function updateGooglePass(cardId) {
+  try {
+    const response = await fetch(`${FUNCTIONS_URL}/update-google-pass`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ cardId }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to update Google pass');
+    }
+
+    return data;
+  } catch (error) {
+    console.error('[updateGooglePass] Error:', error);
+    return { success: false, error: error.message };
+  }
 }
 
 /**
@@ -191,6 +265,10 @@ export default {
   generateGooglePass,
   openGoogleWalletSave,
   supportsGoogleWallet,
+  updateGooglePass,
+
+  // Preview / Wizard
+  previewGooglePass,
 
   // Helpers
   getRecommendedWalletPlatform,

@@ -1,6 +1,7 @@
 import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { OrganizationProvider, useOrganization } from './context/OrganizationContext';
+import { ClientProvider } from './context/ClientContext';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { ThemeProvider as StyledThemeProvider } from 'styled-components';
 import GlobalStyles from './styles/GlobalStyles';
@@ -62,6 +63,7 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <OrganizationProvider>
+          <ClientProvider>
           <ThemeProvider defaultMode="dark">
             <OrganizationThemeWrapper>
               <AuroraBackground>
@@ -70,6 +72,7 @@ function App() {
               </AuroraBackground>
             </OrganizationThemeWrapper>
           </ThemeProvider>
+          </ClientProvider>
         </OrganizationProvider>
       </AuthProvider>
     </BrowserRouter>

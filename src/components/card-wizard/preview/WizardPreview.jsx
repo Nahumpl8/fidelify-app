@@ -1,5 +1,8 @@
-import { useState } from 'react';
+import { useState, useRef, useCallback, useImperativeHandle, forwardRef } from 'react';
 import styled, { keyframes, css } from 'styled-components';
+import { previewGooglePass, openGoogleWalletSave } from '../../../services/wallet';
+import { isValidImageUrl } from '../../../utils/generateStripImage';
+import { captureAndUploadStrip } from '../../../utils/captureStripImage';
 
 // ============================================
 // MAIN CONTAINER - Optimized for Viewport Fit
@@ -82,6 +85,44 @@ const PlatformButton = styled.button`
     width: 40px;
     height: 40px;
     font-size: 18px;
+  }
+`;
+
+const PreviewWalletButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 18px;
+  margin-top: 8px;
+
+  /* Google Wallet gradient */
+  background: linear-gradient(135deg, #4285F4 0%, #34A853 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(66, 133, 244, 0.3);
+
+  &:hover:not(:disabled) {
+    transform: scale(1.08);
+    box-shadow: 0 4px 12px rgba(66, 133, 244, 0.4);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  @media (max-width: 480px) {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+    margin-top: 0;
+    margin-left: 8px;
   }
 `;
 
@@ -559,15 +600,80 @@ const StepLabel = styled.div`
 // ============================================
 // MAIN COMPONENT
 // ============================================
-const WizardPreview = ({
+const WizardPreview = forwardRef(({
   formState,
   simulatedProgress,
   setSimulatedProgress,
   organizationName = 'Mi Negocio',
+  organizationId = null,
   currentStep = 1,
   activeFocusField = null,
-}) => {
+}, ref) => {
   const [platform, setPlatform] = useState('apple');
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const stripRef = useRef(null);
+
+  // Expose captureStrip method to parent via ref
+  const captureStrip = useCallback(async () => {
+    if (!stripRef.current || !organizationId) return null;
+    return captureAndUploadStrip(stripRef.current, organizationId);
+  }, [organizationId]);
+
+  useImperativeHandle(ref, () => ({
+    captureStrip,
+  }), [captureStrip]);
+
+  // Handle Google Wallet Preview
+  const handleGoogleWalletPreview = async () => {
+    if (previewLoading) return;
+
+    setPreviewLoading(true);
+    try {
+      let stripUrl = formState.branding_config?.strip_image_url || null;
+      let heroUrl = formState.branding_config?.hero_image_url || null;
+
+      // If no valid image URL, capture the StripCanvas DOM element
+      if (!isValidImageUrl(stripUrl) && !isValidImageUrl(heroUrl) && organizationId) {
+        if (stripRef.current) {
+          console.log('📸 Capturing strip design from DOM for Google Wallet...');
+          const capturedUrl = await captureAndUploadStrip(stripRef.current, organizationId);
+          if (capturedUrl) {
+            stripUrl = capturedUrl;
+            heroUrl = capturedUrl;
+          }
+        }
+      }
+
+      // Filter base64 logos - Google Wallet can't fetch data URIs
+      const logoUrl = formState.branding_config?.logo_url;
+      const validLogoUrl = isValidImageUrl(logoUrl) ? logoUrl : null;
+
+      const config = {
+        businessName: organizationName,
+        programName: formState.name || `${organizationName} Rewards`,
+        programType: formState.type || 'stamp',
+        logoUrl: validLogoUrl,
+        backgroundColor: formState.branding_config?.background_color || '#4285F4',
+        targetValue: formState.rules_config?.target_stamps || 10,
+        rewardText: formState.rules_config?.reward_name || 'Recompensa',
+        currentBalance: simulatedProgress,
+        stripImageUrl: isValidImageUrl(stripUrl) ? stripUrl : null,
+        heroImageUrl: isValidImageUrl(heroUrl) ? heroUrl : null,
+      };
+
+      const result = await previewGooglePass(config);
+
+      if (result.success && result.saveUrl) {
+        openGoogleWalletSave(result.saveUrl);
+      } else {
+        alert('Error al generar preview: ' + (result.error || 'Error desconocido'));
+      }
+    } catch (err) {
+      alert('Error de conexión');
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
 
   const { type, name, branding_config, rules_config, back_side_config } = formState;
 
@@ -756,7 +862,7 @@ const WizardPreview = ({
                 </IPhoneStatusBar>
                 <CardContainer $isApple>
                   <CardWrapper $scale={0.82}>
-                    <CardPreviewApple {...previewProps} isApple={true} />
+                    <CardPreviewApple {...previewProps} isApple={true} stripRef={stripRef} />
                   </CardWrapper>
                 </CardContainer>
                 <IPhoneHomeIndicator />
@@ -788,7 +894,7 @@ const WizardPreview = ({
                 </GalaxyStatusBar>
                 <CardContainer $isApple={false}>
                   <CardWrapper $scale={0.72}>
-                    <CardPreviewGoogle {...previewProps} isApple={false} />
+                    <CardPreviewGoogle {...previewProps} isApple={false} stripRef={stripRef} />
                   </CardWrapper>
                 </CardContainer>
                 <GalaxyHomeIndicator />
@@ -815,6 +921,15 @@ const WizardPreview = ({
           >
             🤖
           </PlatformButton>
+          {/* Preview in Real Wallet Button */}
+          <PreviewWalletButton
+            type="button"
+            onClick={handleGoogleWalletPreview}
+            disabled={previewLoading || !formState.type}
+            title="Probar en Google Wallet"
+          >
+            {previewLoading ? '⏳' : '📲'}
+          </PreviewWalletButton>
         </PlatformSwitchColumn>
       </MainContent>
 
@@ -839,7 +954,7 @@ const WizardPreview = ({
       )}
     </Container>
   );
-};
+});
 
 /**
  * Get the appropriate strip image based on progress and visual strategy

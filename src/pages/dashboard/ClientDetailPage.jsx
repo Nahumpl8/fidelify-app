@@ -27,6 +27,10 @@ import {
   User,
   TrendingUp,
   Award,
+  Smartphone,
+  DollarSign,
+  Loader2,
+  ExternalLink,
 } from 'lucide-react';
 
 // Services
@@ -34,9 +38,11 @@ import {
   getCard,
   getCardTransactions,
   addStamp,
+  addPointsForPurchase,
   redeemReward,
   calculateProgress,
 } from '../../services/loyalty';
+import { generateGooglePass, openGoogleWalletSave, updateGooglePass } from '../../services/wallet';
 
 /**
  * ClientDetailPage
@@ -124,6 +130,13 @@ const ClientDetailPage = () => {
   // Notes State (local for now)
   const [notes, setNotes] = useState('');
 
+  // Wallet State
+  const [walletLoading, setWalletLoading] = useState(false);
+
+  // Purchase Modal State
+  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
+  const [purchaseAmount, setPurchaseAmount] = useState('');
+
   // ============================================
   // DATA FETCHING
   // ============================================
@@ -193,6 +206,11 @@ const ClientDetailPage = () => {
         // Refresh transactions
         const txns = await getCardTransactions(cardId, { limit: 20 });
         setTransactions(txns);
+
+        // Update Google Wallet pass if linked
+        if (card.google_object_id) {
+          updateGooglePass(cardId).catch(console.error);
+        }
       } else {
         setActionFeedback({
           type: 'error',
@@ -237,6 +255,11 @@ const ClientDetailPage = () => {
 
         const txns = await getCardTransactions(cardId, { limit: 20 });
         setTransactions(txns);
+
+        // Update Google Wallet pass if linked
+        if (card.google_object_id) {
+          updateGooglePass(cardId).catch(console.error);
+        }
       } else {
         setActionFeedback({
           type: 'error',
@@ -282,6 +305,11 @@ const ClientDetailPage = () => {
 
         const txns = await getCardTransactions(cardId, { limit: 20 });
         setTransactions(txns);
+
+        // Update Google Wallet pass if linked
+        if (card.google_object_id) {
+          updateGooglePass(cardId).catch(console.error);
+        }
       } else {
         setActionFeedback({
           type: 'error',
@@ -334,6 +362,11 @@ const ClientDetailPage = () => {
 
         const txns = await getCardTransactions(cardId, { limit: 20 });
         setTransactions(txns);
+
+        // Update Google Wallet pass if linked
+        if (card.google_object_id) {
+          updateGooglePass(cardId).catch(console.error);
+        }
       } else {
         setActionFeedback({
           type: 'error',
@@ -348,6 +381,92 @@ const ClientDetailPage = () => {
     } finally {
       setActionLoading(false);
       setPointsAmount('');
+      setTimeout(() => setActionFeedback(null), 3000);
+    }
+  };
+
+  // Google Wallet Handler
+  const handleAddToGoogleWallet = async () => {
+    if (walletLoading || !card) return;
+
+    setWalletLoading(true);
+    setActionFeedback(null);
+
+    try {
+      const result = await generateGooglePass(cardId);
+
+      if (result.success && result.saveUrl) {
+        openGoogleWalletSave(result.saveUrl);
+        setActionFeedback({
+          type: 'success',
+          message: 'Abriendo Google Wallet...',
+        });
+      } else {
+        setActionFeedback({
+          type: 'error',
+          message: result.error || 'Error al generar pase de Google Wallet',
+        });
+      }
+    } catch (err) {
+      setActionFeedback({
+        type: 'error',
+        message: 'Error de conexión',
+      });
+    } finally {
+      setWalletLoading(false);
+      setTimeout(() => setActionFeedback(null), 3000);
+    }
+  };
+
+  // Purchase Registration Handler
+  const handlePurchaseSubmit = async () => {
+    const amount = parseFloat(purchaseAmount);
+    if (isNaN(amount) || amount <= 0) return;
+
+    setShowPurchaseModal(false);
+    setActionLoading(true);
+    setActionFeedback(null);
+
+    try {
+      const result = await addPointsForPurchase(cardId, amount, {
+        description: `Compra de $${amount.toFixed(2)}`,
+        locationName: 'Dashboard Admin',
+      });
+
+      if (result.success) {
+        setCard((prev) => ({
+          ...prev,
+          current_balance: result.new_balance,
+          lifetime_balance: result.lifetime_balance,
+        }));
+
+        const pointsEarned = result.points_earned || result.amount_added || 0;
+        setActionFeedback({
+          type: 'success',
+          message: `+${pointsEarned} ${programType === 'cashback' ? 'cashback' : 'puntos'} por compra de $${amount.toFixed(2)}`,
+        });
+
+        const txns = await getCardTransactions(cardId, { limit: 20 });
+        setTransactions(txns);
+
+        // Update Google Wallet pass if linked
+        if (card.google_object_id) {
+          updateGooglePass(cardId).catch(console.error);
+        }
+      } else {
+        setActionFeedback({
+          type: 'error',
+          message: result.error || 'Error al registrar compra',
+        });
+      }
+    } catch (err) {
+      setActionFeedback({
+        type: 'error',
+        message: 'Error de conexión',
+      });
+    } finally {
+      setActionLoading(false);
+      setPurchaseAmount('');
       setTimeout(() => setActionFeedback(null), 3000);
     }
   };
@@ -643,8 +762,33 @@ const ClientDetailPage = () => {
             </WalletCarousel>
           </WalletWrapper>
 
-          {/* QUICK ISSUE BUTTONS */}
+          {/* QUICK ACTION BUTTONS */}
           <QuickIssueRow>
+            {/* Google Wallet Button */}
+            <WalletButton
+              onClick={handleAddToGoogleWallet}
+              disabled={walletLoading}
+            >
+              {walletLoading ? (
+                <Loader2 size={16} className="spin" />
+              ) : (
+                <Smartphone size={16} />
+              )}
+              Google Wallet
+              <ExternalLink size={12} />
+            </WalletButton>
+
+            {/* Registrar Compra - Only for points/cashback */}
+            {(programType === 'points' || programType === 'cashback') && (
+              <PurchaseButton
+                onClick={() => setShowPurchaseModal(true)}
+                disabled={actionLoading}
+              >
+                <DollarSign size={16} />
+                Registrar Compra
+              </PurchaseButton>
+            )}
+
             <QuickIssueButton>
               <Percent size={16} />
               Crear Descuento
@@ -652,10 +796,6 @@ const ClientDetailPage = () => {
             <QuickIssueButton>
               <Tag size={16} />
               Emitir Gift Card
-            </QuickIssueButton>
-            <QuickIssueButton>
-              <Zap size={16} />
-              Promo Especial
             </QuickIssueButton>
           </QuickIssueRow>
 
@@ -756,6 +896,63 @@ const ClientDetailPage = () => {
                     Restar
                   </>
                 )}
+              </ModalConfirmButton>
+            </ModalFooter>
+          </ModalContent>
+        </ModalOverlay>
+      )}
+
+      {/* PURCHASE REGISTRATION MODAL */}
+      {showPurchaseModal && (
+        <ModalOverlay onClick={() => setShowPurchaseModal(false)}>
+          <ModalContent onClick={(e) => e.stopPropagation()}>
+            <ModalHeader>
+              <ModalTitle>
+                <DollarSign size={20} style={{ color: '#10B981' }} />
+                Registrar Compra
+              </ModalTitle>
+              <ModalClose onClick={() => setShowPurchaseModal(false)}>
+                <X size={20} />
+              </ModalClose>
+            </ModalHeader>
+            <ModalBody>
+              <ModalLabel>Monto de la compra ($)</ModalLabel>
+              <ModalInput
+                type="number"
+                step="0.01"
+                min="0"
+                placeholder="Ej: 150.00"
+                value={purchaseAmount}
+                onChange={(e) => setPurchaseAmount(e.target.value)}
+                autoFocus
+              />
+              {purchaseAmount && parseFloat(purchaseAmount) > 0 && business?.program_config && (
+                <PurchasePreview>
+                  <PreviewIcon>
+                    {programType === 'cashback' ? <Percent size={16} /> : <Star size={16} />}
+                  </PreviewIcon>
+                  <PreviewText>
+                    {programType === 'cashback'
+                      ? `+$${((parseFloat(purchaseAmount) * (business.program_config.cashback_percentage || 5)) / 100).toFixed(2)} cashback`
+                      : `+${Math.floor(parseFloat(purchaseAmount) * (business.program_config.points_per_currency || 1))} puntos`}
+                  </PreviewText>
+                </PurchasePreview>
+              )}
+              <ModalHint>
+                Los {programType === 'cashback' ? 'cashback' : 'puntos'} se calculan automáticamente según la configuración del programa.
+              </ModalHint>
+            </ModalBody>
+            <ModalFooter>
+              <ModalCancelButton onClick={() => setShowPurchaseModal(false)}>
+                Cancelar
+              </ModalCancelButton>
+              <ModalConfirmButton
+                $mode="add"
+                onClick={handlePurchaseSubmit}
+                disabled={!purchaseAmount || parseFloat(purchaseAmount) <= 0}
+              >
+                <CheckCircle2 size={16} />
+                Registrar
               </ModalConfirmButton>
             </ModalFooter>
           </ModalContent>
@@ -1578,6 +1775,90 @@ const QuickIssueButton = styled.button`
     border-color: rgba(255, 255, 255, 0.25);
     color: #F8FAFC;
   }
+`;
+
+const WalletButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 18px;
+  background: linear-gradient(135deg, #4285F4 0%, #34A853 100%);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(66, 133, 244, 0.3);
+
+  .spin {
+    animation: ${spin} 1s linear infinite;
+  }
+
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(66, 133, 244, 0.4);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+`;
+
+const PurchaseButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 18px;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 12px;
+  color: #10B981;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    background: rgba(16, 185, 129, 0.25);
+    border-color: rgba(16, 185, 129, 0.5);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+`;
+
+const PurchasePreview = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+  padding: 14px;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 12px;
+`;
+
+const PreviewIcon = styled.div`
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(16, 185, 129, 0.2);
+  border-radius: 8px;
+  color: #10B981;
+`;
+
+const PreviewText = styled.span`
+  font-size: 15px;
+  font-weight: 600;
+  color: #10B981;
 `;
 
 // Activity Card

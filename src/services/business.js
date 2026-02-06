@@ -23,6 +23,7 @@ export async function getBusinessBySlug(slug) {
       logo_url,
       icon_url,
       strip_image_url,
+      hero_image_url,
       brand_color,
       background_color,
       label_color,

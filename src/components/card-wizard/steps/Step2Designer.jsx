@@ -211,15 +211,15 @@ const StepIcon = styled.div`
 
   /* ALWAYS Emerald when active - Never client color */
   background: ${({ $active }) =>
-    $active ? 'linear-gradient(135deg, #10B981, #059669)' : 'transparent'};
-  border: 1px solid ${({ $active }) => $active ? '#10B981' : 'transparent'};
+    $active ? 'linear-gradient(135deg, #9787F3, #7C6AE8)' : 'transparent'};
+  border: 1px solid ${({ $active }) => $active ? '#9787F3' : 'transparent'};
   color: ${({ $active, theme }) => $active
     ? 'white'
     : theme.mode === 'dark'
       ? 'rgba(148, 163, 184, 0.7)'
       : 'rgba(71, 85, 105, 0.7)'};
   box-shadow: ${({ $active }) => $active
-    ? '0 4px 12px rgba(16, 185, 129, 0.45)'
+    ? '0 4px 12px rgba(151, 135, 243, 0.45)'
     : 'none'};
 
   @media (max-width: 640px) {
@@ -345,14 +345,14 @@ const NavButton = styled.button`
     }
   ` : css`
     /* Primary: ALWAYS Emerald - Never client color */
-    background: linear-gradient(135deg, #10B981, #059669);
+    background: linear-gradient(135deg, #9787F3, #7C6AE8);
     border: none;
     color: white;
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+    box-shadow: 0 4px 12px rgba(151, 135, 243, 0.4);
 
     &:hover {
       transform: translateY(-1px);
-      box-shadow: 0 6px 16px rgba(16, 185, 129, 0.5);
+      box-shadow: 0 6px 16px rgba(151, 135, 243, 0.5);
     }
   `}
 
@@ -469,9 +469,9 @@ const CompactInput = styled.input`
     background: ${({ theme }) => theme.mode === 'dark'
       ? 'rgba(15, 23, 42, 0.95)'
       : 'rgba(255, 255, 255, 1)'};
-    border-color: #10B981;
+    border-color: #9787F3;
     outline: none;
-    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+    box-shadow: 0 0 0 3px rgba(151, 135, 243, 0.15);
   }
 
   &::placeholder {
@@ -509,9 +509,9 @@ const CompactTextArea = styled.textarea`
     background: ${({ theme }) => theme.mode === 'dark'
       ? 'rgba(15, 23, 42, 0.95)'
       : 'rgba(255, 255, 255, 1)'};
-    border-color: #10B981;
+    border-color: #9787F3;
     outline: none;
-    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+    box-shadow: 0 0 0 3px rgba(151, 135, 243, 0.15);
   }
 
   &::placeholder {
@@ -533,12 +533,12 @@ const SectionTitle = styled.h3`
 
 const Badge = styled.span`
   /* ALWAYS Emerald - Never client color */
-  background: rgba(16, 185, 129, 0.12);
-  color: #10B981;
+  background: rgba(151, 135, 243, 0.12);
+  color: #9787F3;
   font-size: 9px;
   padding: 3px 8px;
   border-radius: 6px;
-  border: 1px solid rgba(16, 185, 129, 0.2);
+  border: 1px solid rgba(151, 135, 243, 0.2);
   font-weight: 600;
   letter-spacing: 0.3px;
 `;
@@ -594,13 +594,13 @@ const Toggle = styled.div`
   position: relative;
   /* ALWAYS Emerald when active - Never client color */
   background: ${({ $active, theme }) => $active
-    ? '#10B981'
+    ? '#9787F3'
     : theme.mode === 'dark'
       ? 'rgba(71, 85, 105, 0.6)'
       : 'rgba(203, 213, 225, 0.9)'};
   transition: background 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: ${({ $active }) => $active
-    ? '0 0 12px rgba(16, 185, 129, 0.5)'
+    ? '0 0 12px rgba(151, 135, 243, 0.5)'
     : 'none'};
 
   &::after {
@@ -630,14 +630,14 @@ const SelectionCard = styled.button`
 
   /* ISLANDS CONCEPT: Slate 900 background, diffuse shadow, NO heavy borders */
   background: ${({ $selected, theme }) => $selected
-    ? 'rgba(16, 185, 129, 0.08)'
+    ? 'rgba(151, 135, 243, 0.08)'
     : theme.mode === 'dark'
       ? 'rgba(15, 23, 42, 0.7)'
       : 'rgba(248, 250, 252, 0.9)'};
 
   /* SELECTED: 2px Emerald border - NEVER client color */
   border: 2px solid ${({ $selected }) => $selected
-    ? '#10B981'
+    ? '#9787F3'
     : 'transparent'};
 
   color: ${({ $selected, theme }) => $selected
@@ -645,20 +645,20 @@ const SelectionCard = styled.button`
     : (theme.mode === 'dark' ? 'rgba(148, 163, 184, 0.9)' : 'rgba(71, 85, 105, 0.9)')};
 
   box-shadow: ${({ $selected, theme }) => $selected
-    ? '0 4px 16px rgba(16, 185, 129, 0.2)'
+    ? '0 4px 16px rgba(151, 135, 243, 0.2)'
     : theme.mode === 'dark'
       ? '0 2px 8px rgba(0, 0, 0, 0.2)'
       : '0 2px 8px rgba(0, 0, 0, 0.04)'};
 
   &:hover {
     background: ${({ $selected, theme }) => $selected
-      ? 'rgba(16, 185, 129, 0.12)'
+      ? 'rgba(151, 135, 243, 0.12)'
       : theme.mode === 'dark'
         ? 'rgba(30, 41, 59, 0.8)'
         : 'rgba(241, 245, 249, 1)'};
     transform: translateY(-1px);
     box-shadow: ${({ $selected, theme }) => $selected
-      ? '0 6px 20px rgba(16, 185, 129, 0.25)'
+      ? '0 6px 20px rgba(151, 135, 243, 0.25)'
       : theme.mode === 'dark'
         ? '0 4px 12px rgba(0, 0, 0, 0.3)'
         : '0 4px 12px rgba(0, 0, 0, 0.06)'};
@@ -672,7 +672,7 @@ const TypeCard = styled(SelectionCard)`
   padding: 20px;
   /* ALWAYS Emerald glow when selected - Never client color */
   box-shadow: ${({ $selected, theme }) => $selected
-    ? '0 0 20px rgba(16, 185, 129, 0.35), 0 4px 16px rgba(16, 185, 129, 0.2)'
+    ? '0 0 20px rgba(151, 135, 243, 0.35), 0 4px 16px rgba(151, 135, 243, 0.2)'
     : theme.mode === 'dark'
       ? '0 2px 8px rgba(0, 0, 0, 0.2)'
       : '0 2px 8px rgba(0, 0, 0, 0.04)'};
@@ -712,7 +712,7 @@ const IconOption = styled.button`
 
   /* ALWAYS Emerald when selected - Never client color */
   background: ${({ $selected, theme }) => $selected
-    ? '#10B981'
+    ? '#9787F3'
     : theme.mode === 'dark'
       ? 'rgba(15, 23, 42, 0.7)'
       : 'rgba(248, 250, 252, 0.9)'};
@@ -722,18 +722,18 @@ const IconOption = styled.button`
       ? 'rgba(148, 163, 184, 0.8)'
       : 'rgba(71, 85, 105, 0.8)'};
   border: 2px solid ${({ $selected }) => $selected
-    ? '#10B981'
+    ? '#9787F3'
     : 'transparent'};
 
   box-shadow: ${({ $selected, theme }) => $selected
-    ? '0 0 16px rgba(16, 185, 129, 0.5), 0 0 32px rgba(16, 185, 129, 0.2)'
+    ? '0 0 16px rgba(151, 135, 243, 0.5), 0 0 32px rgba(151, 135, 243, 0.2)'
     : theme.mode === 'dark'
       ? '0 1px 4px rgba(0, 0, 0, 0.15)'
       : '0 1px 4px rgba(0, 0, 0, 0.03)'};
 
   &:hover {
     background: ${({ $selected, theme }) => $selected
-      ? '#059669'
+      ? '#7C6AE8'
       : theme.mode === 'dark'
         ? 'rgba(30, 41, 59, 0.8)'
         : 'rgba(241, 245, 249, 1)'};
@@ -783,11 +783,11 @@ const FieldSelect = styled.select`
   &:focus {
     outline: none;
     /* ALWAYS Emerald border on focus */
-    border-color: #10B981;
+    border-color: #9787F3;
     background: ${({ theme }) => theme.mode === 'dark'
       ? 'rgba(15, 23, 42, 0.95)'
       : 'rgba(255, 255, 255, 1)'};
-    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+    box-shadow: 0 0 0 3px rgba(151, 135, 243, 0.15);
   }
 
   option {
@@ -836,15 +836,15 @@ const StrategyCard = styled.button`
 
   /* ISLANDS + EMERALD when selected */
   background: ${({ $selected, theme }) => $selected
-    ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(16, 185, 129, 0.05))'
+    ? 'linear-gradient(135deg, rgba(151, 135, 243, 0.12), rgba(151, 135, 243, 0.05))'
     : theme.mode === 'dark'
       ? 'rgba(15, 23, 42, 0.7)'
       : 'rgba(248, 250, 252, 0.9)'};
   border: 2px solid ${({ $selected }) => $selected
-    ? '#10B981'
+    ? '#9787F3'
     : 'transparent'};
   box-shadow: ${({ $selected, theme }) => $selected
-    ? '0 8px 24px rgba(16, 185, 129, 0.25)'
+    ? '0 8px 24px rgba(151, 135, 243, 0.25)'
     : theme.mode === 'dark'
       ? '0 2px 12px rgba(0, 0, 0, 0.2)'
       : '0 2px 12px rgba(0, 0, 0, 0.04)'};
@@ -858,20 +858,20 @@ const StrategyCard = styled.button`
     right: 0;
     height: 3px;
     background: ${({ $selected }) => $selected
-      ? 'linear-gradient(90deg, #10B981, #059669)'
+      ? 'linear-gradient(90deg, #9787F3, #7C6AE8)'
       : 'transparent'};
     transition: background 0.2s ease;
   }
 
   &:hover {
     background: ${({ $selected, theme }) => $selected
-      ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.08))'
+      ? 'linear-gradient(135deg, rgba(151, 135, 243, 0.15), rgba(151, 135, 243, 0.08))'
       : theme.mode === 'dark'
         ? 'rgba(30, 41, 59, 0.8)'
         : 'rgba(241, 245, 249, 1)'};
     transform: translateY(-2px);
     box-shadow: ${({ $selected, theme }) => $selected
-      ? '0 12px 32px rgba(16, 185, 129, 0.3)'
+      ? '0 12px 32px rgba(151, 135, 243, 0.3)'
       : theme.mode === 'dark'
         ? '0 6px 20px rgba(0, 0, 0, 0.3)'
         : '0 6px 20px rgba(0, 0, 0, 0.06)'};
@@ -896,7 +896,7 @@ const StrategyIconBox = styled.div`
 
   /* ALWAYS Emerald gradient when selected */
   background: ${({ $selected, theme }) => $selected
-    ? 'linear-gradient(135deg, #10B981, #059669)'
+    ? 'linear-gradient(135deg, #9787F3, #7C6AE8)'
     : theme.mode === 'dark'
       ? 'rgba(30, 41, 59, 0.8)'
       : 'rgba(241, 245, 249, 0.9)'};
@@ -906,7 +906,7 @@ const StrategyIconBox = styled.div`
       ? 'rgba(148, 163, 184, 0.8)'
       : 'rgba(71, 85, 105, 0.8)'};
   box-shadow: ${({ $selected }) => $selected
-    ? '0 4px 12px rgba(16, 185, 129, 0.45)'
+    ? '0 4px 12px rgba(151, 135, 243, 0.45)'
     : 'none'};
 `;
 
@@ -1050,8 +1050,8 @@ const StudioHeroSection = styled.div`
   align-items: center;
   text-align: center;
   padding: 32px 16px;
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(16, 185, 129, 0.1));
-  border: 1px solid rgba(99, 102, 241, 0.25);
+  background: linear-gradient(135deg, rgba(151, 135, 243, 0.15), rgba(151, 135, 243, 0.1));
+  border: 1px solid rgba(151, 135, 243, 0.25);
   border-radius: 16px;
   margin-bottom: 12px;
   backdrop-filter: blur(20px);
@@ -1066,12 +1066,12 @@ const StudioHeroIcon = styled.div`
   width: 56px;
   height: 56px;
   border-radius: 16px;
-  background: linear-gradient(135deg, #818CF8, #10B981);
+  background: linear-gradient(135deg, #A78BFA, #9787F3);
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 12px;
-  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+  box-shadow: 0 8px 24px rgba(151, 135, 243, 0.4);
   svg { color: white; }
 
   @media (max-width: 640px) {
@@ -1103,18 +1103,18 @@ const StudioHeroButton = styled.button`
   gap: 10px;
   padding: 14px 24px;
   border-radius: 12px;
-  background: linear-gradient(135deg, #818CF8, #6366F1);
+  background: linear-gradient(135deg, #A78BFA, #7C6AE8);
   border: none;
   color: white;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.25s ease;
-  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.5);
+  box-shadow: 0 4px 16px rgba(151, 135, 243, 0.5);
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.6);
+    box-shadow: 0 8px 24px rgba(151, 135, 243, 0.6);
   }
 
   &:active {
@@ -1142,7 +1142,7 @@ const StudioPreviewHint = styled.div`
   backdrop-filter: blur(10px);
 
   svg {
-    color: rgba(99, 102, 241, 0.7);
+    color: rgba(151, 135, 243, 0.7);
     flex-shrink: 0;
   }
 `;
@@ -1172,22 +1172,22 @@ const LayoutOption = styled.button`
 
   /* ISLANDS + EMERALD when selected */
   background: ${({ $selected, theme }) => $selected
-    ? 'rgba(16, 185, 129, 0.08)'
+    ? 'rgba(151, 135, 243, 0.08)'
     : theme.mode === 'dark'
       ? 'rgba(15, 23, 42, 0.7)'
       : 'rgba(248, 250, 252, 0.9)'};
   border: 2px solid ${({ $selected }) => $selected
-    ? '#10B981'
+    ? '#9787F3'
     : 'transparent'};
   box-shadow: ${({ $selected, theme }) => $selected
-    ? '0 4px 16px rgba(16, 185, 129, 0.2)'
+    ? '0 4px 16px rgba(151, 135, 243, 0.2)'
     : theme.mode === 'dark'
       ? '0 2px 8px rgba(0, 0, 0, 0.15)'
       : '0 2px 8px rgba(0, 0, 0, 0.03)'};
 
   &:hover {
     background: ${({ $selected, theme }) => $selected
-      ? 'rgba(16, 185, 129, 0.12)'
+      ? 'rgba(151, 135, 243, 0.12)'
       : theme.mode === 'dark'
         ? 'rgba(30, 41, 59, 0.8)'
         : 'rgba(241, 245, 249, 1)'};
@@ -1223,7 +1223,7 @@ const LayoutStampsBox = styled.div`
 const LayoutImageBox = styled.div`
   width: 50%;
   height: 100%;
-  background: rgba(99, 102, 241, 0.4);
+  background: rgba(151, 135, 243, 0.4);
   border-radius: 2px;
 `;
 
@@ -1342,7 +1342,7 @@ const ColorTrigger = styled.div`
     background: ${({ theme }) => theme.mode === 'dark'
       ? 'rgba(30, 41, 59, 0.9)'
       : 'rgba(226, 232, 240, 1)'};
-    border-color: rgba(16, 185, 129, 0.3);
+    border-color: rgba(151, 135, 243, 0.3);
   }
 `;
 
@@ -1465,8 +1465,8 @@ const SelectQRType = styled.select`
   &:focus {
     outline: none;
     /* ALWAYS Emerald border on focus */
-    border-color: #10B981;
-    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+    border-color: #9787F3;
+    box-shadow: 0 0 0 3px rgba(151, 135, 243, 0.15);
   }
 
   option {
@@ -1533,20 +1533,20 @@ const QRDestinationTab = styled.button`
 
   /* ALWAYS Emerald when active */
   border: 2px solid ${({ $active }) => $active
-    ? '#10B981'
+    ? '#9787F3'
     : 'transparent'};
   background: ${({ $active, theme }) => $active
-    ? 'rgba(16, 185, 129, 0.1)'
+    ? 'rgba(151, 135, 243, 0.1)'
     : theme.mode === 'dark'
       ? 'rgba(15, 23, 42, 0.7)'
       : 'rgba(248, 250, 252, 0.9)'};
   color: ${({ $active, theme }) => $active
-    ? '#10B981'
+    ? '#9787F3'
     : theme.mode === 'dark'
       ? 'rgba(148, 163, 184, 0.8)'
       : 'rgba(71, 85, 105, 0.8)'};
   box-shadow: ${({ $active, theme }) => $active
-    ? '0 4px 12px rgba(16, 185, 129, 0.2)'
+    ? '0 4px 12px rgba(151, 135, 243, 0.2)'
     : theme.mode === 'dark'
       ? '0 2px 8px rgba(0, 0, 0, 0.15)'
       : '0 2px 8px rgba(0, 0, 0, 0.03)'};
@@ -1561,8 +1561,8 @@ const QRDestinationTab = styled.button`
   }
 
   &:hover {
-    border-color: #10B981;
-    background: rgba(16, 185, 129, 0.08);
+    border-color: #9787F3;
+    background: rgba(151, 135, 243, 0.08);
     transform: translateY(-1px);
   }
 `;
@@ -1576,8 +1576,8 @@ const QRAutoInfo = styled.div`
   border-radius: 10px;
 
   /* ALWAYS Emerald accent */
-  background: rgba(16, 185, 129, 0.08);
-  border-left: 3px solid #10B981;
+  background: rgba(151, 135, 243, 0.08);
+  border-left: 3px solid #9787F3;
 
   span {
     font-size: 12px;
@@ -1641,11 +1641,11 @@ const Input = styled.input`
   &:focus {
     outline: none;
     /* ALWAYS Emerald border on focus */
-    border-color: #10B981;
+    border-color: #9787F3;
     background: ${({ theme }) => theme.mode === 'dark'
       ? 'rgba(15, 23, 42, 0.95)'
       : 'rgba(255, 255, 255, 1)'};
-    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+    box-shadow: 0 0 0 3px rgba(151, 135, 243, 0.15);
   }
 
   &::placeholder {
@@ -1964,124 +1964,169 @@ const Step2Designer = ({
         );
 
       case 'identity':
-        // Professional / Services Mode - Digital Business Card
+        // Conditional rendering based on program type
+        if (isProfessional) {
+          // Professional / Services Mode - Digital Business Card
+          return (
+            <CompactGrid>
+              {/* PROFILE SECTION */}
+              <SectionTitle><User size={14} /> Perfil Profesional</SectionTitle>
+
+              <ImageUploaderRow>
+                <ImageUploader
+                  label="Foto de Perfil"
+                  value={branding_config.profile_photo_url}
+                  onChange={(f) => handleUpload(f, 'profile')}
+                  isLoading={isUploading}
+                  description="Foto circular que aparece en la tarjeta"
+                  variant="circular"
+                />
+                <ImageUploader
+                  label="Logo Empresa"
+                  value={branding_config.logo_url}
+                  onChange={(f) => handleUpload(f, 'logo')}
+                  isLoading={isUploading}
+                  description="Logo en el header de la tarjeta"
+                />
+              </ImageUploaderRow>
+
+              <TwoColGrid>
+                <InputGroup>
+                  <Label>Nombre / Título Principal</Label>
+                  <CompactInput
+                    value={branding_config.professional_title || ''}
+                    onChange={(e) => updateBranding({ professional_title: e.target.value })}
+                    placeholder="Juan Pérez"
+                  />
+                </InputGroup>
+                <InputGroup>
+                  <Label>Cargo / Subtítulo</Label>
+                  <CompactInput
+                    value={branding_config.professional_subtitle || ''}
+                    onChange={(e) => updateBranding({ professional_subtitle: e.target.value })}
+                    placeholder="Agente Inmobiliario"
+                  />
+                </InputGroup>
+              </TwoColGrid>
+
+              <TwoColGrid>
+                <InputGroup>
+                  <Label>📧 Email</Label>
+                  <CompactInput
+                    type="email"
+                    value={branding_config.professional_email || ''}
+                    onChange={(e) => updateBranding({ professional_email: e.target.value })}
+                    placeholder="contacto@ejemplo.com"
+                  />
+                </InputGroup>
+                <InputGroup>
+                  <Label>📱 Teléfono</Label>
+                  <CompactInput
+                    type="tel"
+                    value={branding_config.professional_phone || ''}
+                    onChange={(e) => updateBranding({ professional_phone: e.target.value })}
+                    placeholder="+52 555 123 4567"
+                  />
+                </InputGroup>
+              </TwoColGrid>
+
+              <InputGroup style={{ marginTop: 12 }}>
+                <Label>📝 Sobre Mí / Descripción</Label>
+                <CompactInput
+                  as="textarea"
+                  rows={3}
+                  value={branding_config.description || ''}
+                  onChange={(e) => updateBranding({ description: e.target.value })}
+                  placeholder="Breve descripción profesional..."
+                  style={{ height: 'auto', paddingTop: 8 }}
+                />
+              </InputGroup>
+
+              <Divider />
+
+              {/* BRANDING SECTION */}
+              <SectionTitle>Marca de Empresa</SectionTitle>
+
+              <InputGroup>
+                <Label>Nombre de Empresa</Label>
+                <CompactInput
+                  value={branding_config.logo_text || ''}
+                  onChange={(e) => updateBranding({ logo_text: e.target.value })}
+                  placeholder={organization?.name || 'Mi Empresa'}
+                />
+              </InputGroup>
+
+              <ModernColorPicker
+                label="Color de Fondo"
+                value={branding_config.background_color || '#1E3A5F'}
+                onChange={(c) => updateBranding({ background_color: c, primary_color: c })}
+              />
+
+              <Divider />
+
+              {/* QR SECTION - Forced to Custom URL */}
+              <SectionTitle><QrCode size={14} /> Enlace de Contacto</SectionTitle>
+              <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginBottom: 12 }}>
+                Al escanear el QR, los usuarios serán redirigidos a tu enlace personal.
+              </p>
+
+              <InputGroup>
+                <Label>URL de Contacto</Label>
+                <CompactInput
+                  type="url"
+                  value={branding_config.qr_custom_url || ''}
+                  onChange={(e) => updateBranding({
+                    qr_type: 'qr_code',
+                    qr_mode: 'custom',
+                    qr_custom_url: e.target.value
+                  })}
+                  placeholder="https://linktr.ee/tunombre"
+                />
+                <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginTop: 6 }}>
+                  💡 Usa tu Linktree, WhatsApp, o página web personal
+                </p>
+              </InputGroup>
+            </CompactGrid>
+          );
+        }
+
+        // Standard Mode - Brand Identity for Stamp/Points Programs
         return (
           <CompactGrid>
-            {/* PROFILE SECTION */}
-            <SectionTitle><User size={14} /> Perfil Profesional</SectionTitle>
+            {/* LOGO & BRAND SECTION */}
+            <SectionTitle><User size={14} /> Identidad de Marca</SectionTitle>
 
             <ImageUploaderRow>
               <ImageUploader
-                label="Foto de Perfil"
-                value={branding_config.profile_photo_url}
-                onChange={(f) => handleUpload(f, 'profile')}
-                isLoading={isUploading}
-                description="Foto circular que aparece en la tarjeta"
-                variant="circular"
-              />
-              <ImageUploader
-                label="Logo Empresa"
+                label="Logo del Negocio"
                 value={branding_config.logo_url}
                 onChange={(f) => handleUpload(f, 'logo')}
                 isLoading={isUploading}
-                description="Logo en el header de la tarjeta"
+                description="Logo que aparece en el header de la tarjeta"
               />
             </ImageUploaderRow>
 
-            <TwoColGrid>
-              <InputGroup>
-                <Label>Nombre / Título Principal</Label>
-                <CompactInput
-                  value={branding_config.professional_title || ''}
-                  onChange={(e) => updateBranding({ professional_title: e.target.value })}
-                  placeholder="Juan Pérez"
-                />
-              </InputGroup>
-              <InputGroup>
-                <Label>Cargo / Subtítulo</Label>
-                <CompactInput
-                  value={branding_config.professional_subtitle || ''}
-                  onChange={(e) => updateBranding({ professional_subtitle: e.target.value })}
-                  placeholder="Agente Inmobiliario"
-                />
-              </InputGroup>
-            </TwoColGrid>
-
-            <TwoColGrid>
-              <InputGroup>
-                <Label>📧 Email</Label>
-                <CompactInput
-                  type="email"
-                  value={branding_config.professional_email || ''}
-                  onChange={(e) => updateBranding({ professional_email: e.target.value })}
-                  placeholder="contacto@ejemplo.com"
-                />
-              </InputGroup>
-              <InputGroup>
-                <Label>📱 Teléfono</Label>
-                <CompactInput
-                  type="tel"
-                  value={branding_config.professional_phone || ''}
-                  onChange={(e) => updateBranding({ professional_phone: e.target.value })}
-                  placeholder="+52 555 123 4567"
-                />
-              </InputGroup>
-            </TwoColGrid>
-
-            <InputGroup style={{ marginTop: 12 }}>
-              <Label>📝 Sobre Mí / Descripción</Label>
-              <CompactInput
-                as="textarea"
-                rows={3}
-                value={branding_config.description || ''}
-                onChange={(e) => updateBranding({ description: e.target.value })}
-                placeholder="Breve descripción profesional..."
-                style={{ height: 'auto', paddingTop: 8 }}
-              />
-            </InputGroup>
-
-            <Divider />
-
-            {/* BRANDING SECTION */}
-            <SectionTitle>Marca de Empresa</SectionTitle>
-
             <InputGroup>
-              <Label>Nombre de Empresa</Label>
+              <Label>Nombre del Negocio</Label>
               <CompactInput
                 value={branding_config.logo_text || ''}
                 onChange={(e) => updateBranding({ logo_text: e.target.value })}
-                placeholder={organization?.name || 'Mi Empresa'}
-              />
-            </InputGroup>
-
-            <ModernColorPicker
-              label="Color de Fondo"
-              value={branding_config.background_color || '#1E3A5F'}
-              onChange={(c) => updateBranding({ background_color: c, primary_color: c })}
-            />
-
-            <Divider />
-
-            {/* QR SECTION - Forced to Custom URL */}
-            <SectionTitle><QrCode size={14} /> Enlace de Contacto</SectionTitle>
-            <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginBottom: 12 }}>
-              Al escanear el QR, los usuarios serán redirigidos a tu enlace personal.
-            </p>
-
-            <InputGroup>
-              <Label>URL de Contacto</Label>
-              <CompactInput
-                type="url"
-                value={branding_config.qr_custom_url || ''}
-                onChange={(e) => updateBranding({
-                  qr_type: 'qr_code',
-                  qr_mode: 'custom',
-                  qr_custom_url: e.target.value
-                })}
-                placeholder="https://linktr.ee/tunombre"
+                placeholder={organization?.name || 'Mi Negocio'}
               />
               <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginTop: 6 }}>
-                💡 Usa tu Linktree, WhatsApp, o página web personal
+                Este nombre aparecerá en el header de tu tarjeta de lealtad
+              </p>
+            </InputGroup>
+
+            <InputGroup>
+              <Label>Nombre del Programa</Label>
+              <CompactInput
+                value={name || ''}
+                onChange={(e) => updateField('name', e.target.value)}
+                placeholder="Programa de Lealtad"
+              />
+              <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginTop: 6 }}>
+                Ej: "Mis Cafecitos", "Puntos Fresh", "Cliente VIP"
               </p>
             </InputGroup>
           </CompactGrid>

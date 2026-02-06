@@ -1,3 +1,4 @@
+import { forwardRef } from 'react';
 import styled, { css } from 'styled-components';
 import {
   Star, Coffee, Scissors, Heart, Smile, Check, Gift, Sparkles,
@@ -45,14 +46,14 @@ const getGridConfig = (total, isSplit, designConfig = {}) => {
  * KEY: This component renders at 100% width of its container
  * and maintains the Apple Wallet Store Card aspect ratio (1125x432 @3x = ~2.6:1)
  */
-const StripCanvas = ({
+const StripCanvas = forwardRef(({
   brandingConfig = {},
   rulesConfig = {},
   currentProgress = 0,
   scale = 1,
   showSafeZones = false,
   showGoogleMask = false,
-}) => {
+}, ref) => {
   const visualStrategy = brandingConfig.visual_strategy || 'iconic_grid';
   const totalStamps = parseInt(rulesConfig.target_stamps || 10);
   const stripLayout = brandingConfig.strip_layout || 'left';
@@ -222,7 +223,7 @@ const StripCanvas = ({
 
   return (
     <CanvasContainer $scale={scale}>
-      <StripWrapper>
+      <StripWrapper ref={ref}>
         {renderStripContent()}
         {showSafeZones && (
           <SafeZoneOverlay>
@@ -239,7 +240,7 @@ const StripCanvas = ({
       </StripWrapper>
     </CanvasContainer>
   );
-};
+});
 
 // ============================================
 // STYLED COMPONENTS

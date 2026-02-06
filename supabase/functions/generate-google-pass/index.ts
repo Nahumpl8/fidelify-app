@@ -1,369 +1,455 @@
-/**
- * Supabase Edge Function: Generate Google Wallet Pass
- * Crea un loyalty object en Google Wallet API y devuelve el save URL
- *
- * Requiere los siguientes secrets:
- * - GOOGLE_WALLET_ISSUER_ID
- * - GOOGLE_SERVICE_ACCOUNT_JSON
- */
-
-import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.0';
-import { encode as base64UrlEncode } from 'https://deno.land/std@0.177.0/encoding/base64url.ts';
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers':
-    'authorization, x-client-info, apikey, content-type',
-};
-
-const GOOGLE_WALLET_SAVE_URL = 'https://pay.google.com/gp/v/save';
-
-interface GeneratePassRequest {
-  cardId: string;
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-interface ServiceAccount {
-  type: string;
-  project_id: string;
-  private_key_id: string;
-  private_key: string;
-  client_email: string;
-  client_id: string;
-  auth_uri: string;
-  token_uri: string;
+/** Validate that a URL is a real HTTPS URL (not base64, not null/empty) */
+function isValidUrl(url: string | null | undefined): boolean {
+  if (!url) return false
+  if (url.startsWith('data:')) return false
+  try {
+    const parsed = new URL(url)
+    return parsed.protocol === 'https:' || parsed.protocol === 'http:'
+  } catch {
+    return false
+  }
 }
 
-serve(async (req: Request) => {
-  // Handle CORS preflight
+serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
+    return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    // Obtener configuración de Google Wallet
-    const GOOGLE_ISSUER_ID = Deno.env.get('GOOGLE_WALLET_ISSUER_ID');
-    const GOOGLE_SA_JSON = Deno.env.get('GOOGLE_SERVICE_ACCOUNT_JSON');
+    const ISSUER_ID = Deno.env.get('GOOGLE_WALLET_ISSUER_ID')
+    const SA_JSON = Deno.env.get('GOOGLE_SERVICE_ACCOUNT_JSON')
+    const SUPABASE_URL = Deno.env.get('SUPABASE_URL')
+    const SUPABASE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
 
-    // Verificar credenciales
-    if (!GOOGLE_ISSUER_ID) {
-      return new Response(
-        JSON.stringify({
-          success: false,
-          error: 'Google Wallet Issuer ID not configured',
-          error_code: 'CREDENTIALS_MISSING',
-          hint: 'Configure GOOGLE_WALLET_ISSUER_ID secret',
-        }),
-        {
-          status: 503,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      );
+    if (!ISSUER_ID || !SA_JSON) {
+      return new Response(JSON.stringify({ success: false, error: 'Credentials not configured' }), {
+        status: 503,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
     }
 
-    if (!GOOGLE_SA_JSON) {
-      return new Response(
-        JSON.stringify({
-          success: false,
-          error: 'Google Service Account not configured',
-          error_code: 'CREDENTIALS_MISSING',
-          hint: 'Configure GOOGLE_SERVICE_ACCOUNT_JSON secret',
-        }),
-        {
-          status: 503,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      );
-    }
-
-    // Parse service account
-    let serviceAccount: ServiceAccount;
-    try {
-      serviceAccount = JSON.parse(GOOGLE_SA_JSON);
-    } catch (e) {
-      return new Response(
-        JSON.stringify({
-          success: false,
-          error: 'Invalid service account JSON',
-          error_code: 'INVALID_CREDENTIALS',
-        }),
-        {
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      );
-    }
-
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
-
-    // Parse request
-    const { cardId }: GeneratePassRequest = await req.json();
+    const sa = JSON.parse(SA_JSON)
+    const { cardId } = await req.json()
 
     if (!cardId) {
-      return new Response(
-        JSON.stringify({ success: false, error: 'cardId is required' }),
-        {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      );
+      return new Response(JSON.stringify({ success: false, error: 'cardId required' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
     }
 
-    // Obtener datos de la tarjeta
-    const { data: card, error: cardError } = await supabaseAdmin
-      .from('loyalty_cards')
-      .select(
-        `
-        *,
-        client:clients (id, full_name, email),
-        business:businesses (
-          id, name, slug, logo_url, strip_image_url,
-          brand_color, background_color,
-          program_type, target_value, reward_text,
-          program_config, wallet_settings
-        )
-      `
-      )
-      .eq('id', cardId)
-      .single();
-
-    if (cardError || !card) {
-      return new Response(
-        JSON.stringify({ success: false, error: 'Card not found' }),
-        {
-          status: 404,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }
-      );
-    }
-
-    // Generar IDs
-    const classId = `${GOOGLE_ISSUER_ID}.${card.business.slug}_loyalty`;
-    const objectId =
-      card.google_object_id ||
-      `${GOOGLE_ISSUER_ID}.${card.id.replace(/-/g, '')}`;
-
-    // Construir Loyalty Class (plantilla del programa)
-    const loyaltyClass = {
-      id: classId,
-      issuerName: card.business.name,
-      programName: `${card.business.name} Rewards`,
-      programLogo: card.business.logo_url
-        ? {
-            sourceUri: { uri: card.business.logo_url },
-            contentDescription: {
-              defaultValue: { language: 'es', value: 'Logo' },
-            },
-          }
-        : undefined,
-      hexBackgroundColor: card.business.background_color || '#FFFFFF',
-      reviewStatus: 'UNDER_REVIEW',
-      // Configuración adicional
-      localizedIssuerName: {
-        defaultValue: { language: 'es', value: card.business.name },
-      },
-      localizedProgramName: {
-        defaultValue: {
-          language: 'es',
-          value: `Programa de Lealtad ${card.business.name}`,
+    // Fetch card first
+    const cardRes = await fetch(
+      `${SUPABASE_URL}/rest/v1/loyalty_cards?id=eq.${cardId}&select=*`,
+      {
+        headers: {
+          'apikey': SUPABASE_KEY!,
+          'Authorization': `Bearer ${SUPABASE_KEY}`,
         },
-      },
-    };
+      }
+    )
 
-    // Construir Loyalty Object (instancia para este cliente)
+    if (!cardRes.ok) {
+      const errorText = await cardRes.text()
+      console.error('Card fetch failed:', cardRes.status, errorText)
+      return new Response(JSON.stringify({ success: false, error: `Failed to fetch card: ${cardRes.status}` }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    const cards = await cardRes.json()
+    console.log('Card response:', JSON.stringify(cards))
+
+    if (!Array.isArray(cards)) {
+      console.error('Card response is not an array:', cards)
+      return new Response(JSON.stringify({ success: false, error: 'Invalid card response format' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    if (cards.length === 0) {
+      return new Response(JSON.stringify({ success: false, error: `Card not found with id: ${cardId}` }), {
+        status: 404,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    const card = cards[0]
+    console.log('Card business_id:', card.business_id)
+
+    // Fetch business data
+    if (!card.business_id) {
+      return new Response(JSON.stringify({ success: false, error: 'Card has no business_id field' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    console.log('Fetching business with id:', card.business_id)
+    const bizRes = await fetch(
+      `${SUPABASE_URL}/rest/v1/businesses?id=eq.${card.business_id}&select=*`,
+      {
+        headers: {
+          'apikey': SUPABASE_KEY!,
+          'Authorization': `Bearer ${SUPABASE_KEY}`,
+          'Prefer': 'return=representation',
+        },
+      }
+    )
+
+    if (!bizRes.ok) {
+      const errorText = await bizRes.text()
+      console.error('Business fetch failed:', bizRes.status, errorText)
+      return new Response(JSON.stringify({ success: false, error: `Failed to fetch business: ${bizRes.status}` }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    const businesses = await bizRes.json()
+    console.log('Business response:', JSON.stringify(businesses))
+
+    if (!Array.isArray(businesses)) {
+      console.error('Business response is not an array:', businesses)
+      return new Response(JSON.stringify({ success: false, error: 'Invalid business response format' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    if (businesses.length === 0) {
+      return new Response(JSON.stringify({ success: false, error: `Business not found with id: ${card.business_id}` }), {
+        status: 404,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    const business = businesses[0]
+    console.log('Business data:', JSON.stringify(business))
+    console.log('Business branding - logo_url:', business.logo_url)
+    console.log('Business branding - background_color:', business.background_color)
+    console.log('Business branding - strip_image_url:', business.strip_image_url)
+    console.log('Business branding - brand_color:', business.brand_color)
+
+    // Fetch client data (optional)
+    let client = null
+    if (card.client_id) {
+      const clientRes = await fetch(
+        `${SUPABASE_URL}/rest/v1/clients?id=eq.${card.client_id}&select=id,full_name,email`,
+        {
+          headers: {
+            'apikey': SUPABASE_KEY!,
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+          },
+        }
+      )
+      const clients = await clientRes.json()
+      if (clients && clients.length > 0) {
+        client = clients[0]
+      }
+    }
+
+    // Sanitize slug for class ID (only alphanumeric, underscore, period allowed)
+    const safeSlug = (business.slug || 'default').replace(/[^a-zA-Z0-9_]/g, '_')
+    const classId = `${ISSUER_ID}.${safeSlug}_loyalty`
+    const objectId = card.google_object_id || `${ISSUER_ID}.card_${card.id.replace(/-/g, '')}`
+
+    // Get OAuth token for Google Wallet API
+    const accessToken = await getGoogleAccessToken(sa)
+
+    // Default logo if business doesn't have one — reject base64 URLs
+    const defaultLogo = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(business.name) + '&size=256&background=4285F4&color=fff&bold=true'
+    const logoUrl = isValidUrl(business.logo_url) ? business.logo_url : defaultLogo
+
+    const targetValue = business.target_value || 10
+    const currentBalance = card.current_balance || 0
+
+    // Use custom strip/hero image from Storage — reject base64 URLs
+    const heroImageUrl = isValidUrl(business.strip_image_url) ? business.strip_image_url : isValidUrl(business.hero_image_url) ? business.hero_image_url : null
+
+    // Step 1: Create or update the Loyalty Class
+    const loyaltyClass: Record<string, unknown> = {
+      id: classId,
+      issuerName: business.name,
+      programName: `${business.name} Rewards`,
+      programLogo: {
+        sourceUri: { uri: logoUrl },
+        contentDescription: { defaultValue: { language: 'es', value: business.name } }
+      },
+      hexBackgroundColor: business.background_color || '#4285F4',
+      reviewStatus: 'UNDER_REVIEW',
+      countryCode: 'MX',
+    }
+
+    // Add hero image if available (main visual strip in Google Wallet)
+    if (heroImageUrl) {
+      loyaltyClass.heroImage = {
+        sourceUri: { uri: heroImageUrl },
+        contentDescription: { defaultValue: { language: 'es', value: `${business.name} Card` } }
+      }
+    }
+
+    // Try to create the class, or update if it exists
+    const classResult = await createOrUpdateClass(accessToken, classId, loyaltyClass)
+    console.log('Class result:', classResult)
+
+    // Step 2: Create the Loyalty Object
+    const label = business.program_type === 'seals' ? 'Sellos' : business.program_type === 'cashback' ? 'Cashback' : 'Puntos'
+
     const loyaltyObject = {
       id: objectId,
       classId: classId,
       state: 'ACTIVE',
-      accountId: card.client?.email || card.id,
-      accountName: card.client?.full_name || 'Cliente',
-
+      accountId: client?.email || card.id,
+      accountName: client?.full_name || 'Cliente',
       loyaltyPoints: {
-        label: getPointsLabel(card.business.program_type),
+        label: label,
         balance: {
-          int: card.current_balance,
-        },
+          int: card.current_balance || 0
+        }
       },
-
       barcode: {
         type: 'QR_CODE',
         value: card.id,
-        alternateText: card.id.substring(0, 8).toUpperCase(),
+        alternateText: card.id.substring(0, 8).toUpperCase()
       },
-
-      heroImage: card.business.strip_image_url
-        ? {
-            sourceUri: { uri: card.business.strip_image_url },
-            contentDescription: {
-              defaultValue: { language: 'es', value: card.business.name },
-            },
-          }
-        : undefined,
-
       textModulesData: [
         {
           header: 'Premio',
-          body: card.business.reward_text || 'Recompensa especial',
-          id: 'reward',
+          body: business.reward_text || 'Recompensa especial',
+          id: 'reward'
         },
         {
-          header: 'Meta',
-          body: `${card.business.target_value} ${getPointsLabel(card.business.program_type).toLowerCase()}`,
-          id: 'target',
-        },
+          header: 'Progreso',
+          body: `${card.current_balance || 0} / ${business.target_value || 10}`,
+          id: 'progress'
+        }
       ],
+    }
 
-      linksModuleData: {
-        uris: [
-          {
-            uri: `${supabaseUrl.replace('.supabase.co', '')}/join/${card.business.slug}`,
-            description: 'Ver mi tarjeta',
-            id: 'view_card',
-          },
-        ],
-      },
-    };
+    // Create or update the object
+    const objectResult = await createOrUpdateObject(accessToken, objectId, loyaltyObject)
+    console.log('Object result:', objectResult)
 
-    // Crear JWT firmado para "Add to Google Wallet"
-    const jwt = await createSignedJwt(serviceAccount, {
-      iss: serviceAccount.client_email,
+    // Step 3: Generate the Save URL using JWT (for adding to wallet)
+    const claims = {
+      iss: sa.client_email,
       aud: 'google',
       typ: 'savetowallet',
       iat: Math.floor(Date.now() / 1000),
       origins: ['*'],
       payload: {
-        loyaltyClasses: [loyaltyClass],
-        loyaltyObjects: [loyaltyObject],
-      },
-    });
-
-    // Construir URL de guardado
-    const saveUrl = `${GOOGLE_WALLET_SAVE_URL}/${jwt}`;
-
-    // Actualizar el google_object_id en la base de datos
-    if (!card.google_object_id) {
-      await supabaseAdmin
-        .from('loyalty_cards')
-        .update({
-          google_object_id: objectId,
-          google_class_id: classId,
-          google_last_updated: new Date().toISOString(),
-        })
-        .eq('id', cardId);
+        loyaltyObjects: [{ id: objectId }]
+      }
     }
 
-    return new Response(
-      JSON.stringify({
-        success: true,
-        saveUrl: saveUrl,
-        objectId: objectId,
-        classId: classId,
-        card: {
-          id: card.id,
-          balance: card.current_balance,
-          businessName: card.business.name,
-        },
-      }),
-      {
-        status: 200,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      }
-    );
-  } catch (error) {
-    console.error('[generate-google-pass] Error:', error);
-    return new Response(
-      JSON.stringify({
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-      }),
-      {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      }
-    );
+    const jwt = await signJwt(sa, claims)
+    const saveUrl = `https://pay.google.com/gp/v/save/${jwt}`
+
+    // Update card in database
+    if (!card.google_object_id) {
+      await fetch(
+        `${SUPABASE_URL}/rest/v1/loyalty_cards?id=eq.${cardId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            'apikey': SUPABASE_KEY!,
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal',
+          },
+          body: JSON.stringify({
+            google_object_id: objectId,
+            google_class_id: classId,
+            google_last_updated: new Date().toISOString(),
+          }),
+        }
+      )
+    }
+
+    return new Response(JSON.stringify({
+      success: true,
+      saveUrl,
+      objectId,
+      classId,
+      classCreated: classResult.created,
+      objectCreated: objectResult.created,
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
+  } catch (e) {
+    console.error('Error:', e)
+    return new Response(JSON.stringify({ success: false, error: String(e) }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
   }
-});
+})
 
-/**
- * Crear JWT firmado con RS256 usando la private key del service account
- */
-async function createSignedJwt(
-  serviceAccount: ServiceAccount,
-  payload: Record<string, unknown>
-): Promise<string> {
-  // Header
-  const header = {
-    alg: 'RS256',
-    typ: 'JWT',
-  };
+// Get Google OAuth access token using service account
+async function getGoogleAccessToken(sa: { client_email: string; private_key: string }): Promise<string> {
+  const now = Math.floor(Date.now() / 1000)
+  const claims = {
+    iss: sa.client_email,
+    sub: sa.client_email,
+    aud: 'https://oauth2.googleapis.com/token',
+    iat: now,
+    exp: now + 3600,
+    scope: 'https://www.googleapis.com/auth/wallet_object.issuer'
+  }
 
-  // Encode header y payload
-  const encodedHeader = base64UrlEncode(
-    new TextEncoder().encode(JSON.stringify(header))
-  );
-  const encodedPayload = base64UrlEncode(
-    new TextEncoder().encode(JSON.stringify(payload))
-  );
+  const jwt = await signJwt(sa, claims)
 
-  // String a firmar
-  const signatureInput = `${encodedHeader}.${encodedPayload}`;
+  const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${jwt}`
+  })
 
-  // Importar la private key
-  const privateKey = await importPrivateKey(serviceAccount.private_key);
+  const tokenData = await tokenRes.json()
+  if (!tokenData.access_token) {
+    throw new Error(`Failed to get access token: ${JSON.stringify(tokenData)}`)
+  }
 
-  // Firmar
-  const signature = await crypto.subtle.sign(
-    { name: 'RSASSA-PKCS1-v1_5' },
-    privateKey,
-    new TextEncoder().encode(signatureInput)
-  );
-
-  // Encode signature
-  const encodedSignature = base64UrlEncode(new Uint8Array(signature));
-
-  return `${signatureInput}.${encodedSignature}`;
+  return tokenData.access_token
 }
 
-/**
- * Importar private key PEM para uso con Web Crypto API
- */
-async function importPrivateKey(pem: string): Promise<CryptoKey> {
-  // Limpiar el PEM
-  const pemContents = pem
+// Create or update Loyalty Class
+async function createOrUpdateClass(accessToken: string, classId: string, classData: Record<string, unknown>) {
+  // First try to get the class
+  const getRes = await fetch(
+    `https://walletobjects.googleapis.com/walletobjects/v1/loyaltyClass/${classId}`,
+    {
+      headers: { 'Authorization': `Bearer ${accessToken}` }
+    }
+  )
+
+  if (getRes.status === 200) {
+    // Class exists, update it
+    const updateRes = await fetch(
+      `https://walletobjects.googleapis.com/walletobjects/v1/loyaltyClass/${classId}`,
+      {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(classData)
+      }
+    )
+    const data = await updateRes.json()
+    return { created: false, updated: true, data }
+  } else {
+    // Class doesn't exist, create it
+    const createRes = await fetch(
+      'https://walletobjects.googleapis.com/walletobjects/v1/loyaltyClass',
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(classData)
+      }
+    )
+    const data = await createRes.json()
+    if (!createRes.ok) {
+      console.error('Failed to create class:', data)
+      throw new Error(`Failed to create class: ${JSON.stringify(data)}`)
+    }
+    return { created: true, updated: false, data }
+  }
+}
+
+// Create or update Loyalty Object
+async function createOrUpdateObject(accessToken: string, objectId: string, objectData: Record<string, unknown>) {
+  // First try to get the object
+  const getRes = await fetch(
+    `https://walletobjects.googleapis.com/walletobjects/v1/loyaltyObject/${objectId}`,
+    {
+      headers: { 'Authorization': `Bearer ${accessToken}` }
+    }
+  )
+
+  if (getRes.status === 200) {
+    // Object exists, update it
+    const updateRes = await fetch(
+      `https://walletobjects.googleapis.com/walletobjects/v1/loyaltyObject/${objectId}`,
+      {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(objectData)
+      }
+    )
+    const data = await updateRes.json()
+    return { created: false, updated: true, data }
+  } else {
+    // Object doesn't exist, create it
+    const createRes = await fetch(
+      'https://walletobjects.googleapis.com/walletobjects/v1/loyaltyObject',
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(objectData)
+      }
+    )
+    const data = await createRes.json()
+    if (!createRes.ok) {
+      console.error('Failed to create object:', data)
+      throw new Error(`Failed to create object: ${JSON.stringify(data)}`)
+    }
+    return { created: true, updated: false, data }
+  }
+}
+
+// Sign JWT with RS256
+async function signJwt(sa: { client_email: string; private_key: string }, payload: Record<string, unknown>): Promise<string> {
+  const header = { alg: 'RS256', typ: 'JWT' }
+
+  const h = btoa(JSON.stringify(header)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+  const p = btoa(JSON.stringify(payload)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+  const input = `${h}.${p}`
+
+  const pem = sa.private_key
     .replace('-----BEGIN PRIVATE KEY-----', '')
     .replace('-----END PRIVATE KEY-----', '')
-    .replace(/\s/g, '');
+    .replace(/\s/g, '')
 
-  // Decodificar de base64
-  const binaryDer = Uint8Array.from(atob(pemContents), (c) => c.charCodeAt(0));
+  const der = Uint8Array.from(atob(pem), (c) => c.charCodeAt(0))
 
-  // Importar como CryptoKey
-  return await crypto.subtle.importKey(
+  const key = await crypto.subtle.importKey(
     'pkcs8',
-    binaryDer,
-    {
-      name: 'RSASSA-PKCS1-v1_5',
-      hash: 'SHA-256',
-    },
+    der,
+    { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
     false,
     ['sign']
-  );
-}
+  )
 
-// Helper: Get points label based on program type
-function getPointsLabel(programType: string): string {
-  switch (programType) {
-    case 'seals':
-      return 'Sellos';
-    case 'points':
-      return 'Puntos';
-    case 'cashback':
-      return 'Cashback';
-    case 'levels':
-      return 'XP';
-    default:
-      return 'Puntos';
-  }
+  const sig = await crypto.subtle.sign(
+    { name: 'RSASSA-PKCS1-v1_5' },
+    key,
+    new TextEncoder().encode(input)
+  )
+
+  const s = btoa(String.fromCharCode(...new Uint8Array(sig)))
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '')
+
+  return `${input}.${s}`
 }

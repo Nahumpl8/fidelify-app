@@ -5,10 +5,15 @@ import { useAuth } from './context/AuthContext';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import ForgotPassword from './pages/auth/ForgotPassword';
+import ClientLogin from './pages/auth/ClientLogin';
 
 // Pages - Public
 import Landing from './pages/public/Landing';
 import JoinPage from './pages/public/JoinPage';
+
+// Pages - Client Portal
+import ClientPortal from './pages/client/ClientPortal';
+import ClientCardDetail from './pages/client/ClientCardDetail';
 
 // Pages - Dashboard
 import DashboardLayout from './components/layout/DashboardLayout';
@@ -27,10 +32,10 @@ import SpecialPromo from './pages/promo-wizard/SpecialPromo';
 
 
 /**
- * ProtectedRoute: Redirige a login si no hay sesión
+ * ProtectedRoute: Solo business owners, redirige clients al portal
  */
 const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, isClient } = useAuth();
 
   if (loading) {
     return (
@@ -51,14 +56,52 @@ const ProtectedRoute = ({ children }) => {
     return <Navigate to="/login" replace />;
   }
 
+  // Client users go to their portal
+  if (isClient()) {
+    return <Navigate to="/portal" replace />;
+  }
+
   return children;
 };
 
 /**
- * PublicOnlyRoute: Redirige al dashboard si ya hay sesión
+ * ClientRoute: Solo clientes autenticados
+ */
+const ClientRoute = ({ children }) => {
+  const { isAuthenticated, loading, isClient } = useAuth();
+
+  if (loading) {
+    return (
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: '100vh',
+        }}
+      >
+        Verificando sesión...
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/client/login" replace />;
+  }
+
+  // Business users go to their dashboard
+  if (!isClient()) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return children;
+};
+
+/**
+ * PublicOnlyRoute: Redirige según rol si ya hay sesión
  */
 const PublicOnlyRoute = ({ children }) => {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, isClient } = useAuth();
 
   if (loading) {
     return (
@@ -76,6 +119,9 @@ const PublicOnlyRoute = ({ children }) => {
   }
 
   if (isAuthenticated) {
+    if (isClient()) {
+      return <Navigate to="/portal" replace />;
+    }
     return <Navigate to="/dashboard" replace />;
   }
 
@@ -105,7 +151,7 @@ const Router = () => {
       {/* Registro de clientes por slug del negocio */}
       <Route path="/join/:slug" element={<JoinPage />} />
 
-      {/* Rutas de autenticación */}
+      {/* Rutas de autenticación - Business */}
       <Route
         path="/login"
         element={
@@ -131,7 +177,35 @@ const Router = () => {
         }
       />
 
-      {/* Dashboard - Rutas protegidas */}
+      {/* Rutas de autenticación - Client */}
+      <Route
+        path="/client/login"
+        element={
+          <PublicOnlyRoute>
+            <ClientLogin />
+          </PublicOnlyRoute>
+        }
+      />
+
+      {/* Portal del cliente */}
+      <Route
+        path="/portal"
+        element={
+          <ClientRoute>
+            <ClientPortal />
+          </ClientRoute>
+        }
+      />
+      <Route
+        path="/portal/card/:cardId"
+        element={
+          <ClientRoute>
+            <ClientCardDetail />
+          </ClientRoute>
+        }
+      />
+
+      {/* Dashboard - Rutas protegidas (business) */}
       <Route
         path="/dashboard"
         element={

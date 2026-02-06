@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import styled from 'styled-components';
+import { useNavigate } from 'react-router-dom';
+import styled, { keyframes } from 'styled-components';
 import {
   Users,
   Plus,
@@ -8,15 +9,23 @@ import {
   Star,
   Gift,
   Trash2,
+  User,
+  Smartphone,
+  Loader2,
+  ExternalLink,
+  Copy,
+  Check,
 } from 'lucide-react';
 import { useOrganization } from '../../context/OrganizationContext';
 import { useAuth } from '../../context/AuthContext';
+import { generateGooglePass, openGoogleWalletSave } from '../../services/wallet';
 import { getCustomers, registerVisit, redeemReward, deleteCustomer } from '../../api/customers';
 import Button from '../../components/common/Button';
 import Input from '../../components/common/Input';
 import Modal from '../../components/common/Modal';
 
 const Customers = () => {
+  const navigate = useNavigate();
   const { organization } = useOrganization();
   const { user } = useAuth();
   const [customers, setCustomers] = useState([]);
@@ -32,6 +41,12 @@ const Customers = () => {
 
   // Dropdown menu
   const [openMenuId, setOpenMenuId] = useState(null);
+
+  // Wallet loading state
+  const [walletLoadingId, setWalletLoadingId] = useState(null);
+
+  // Copy link state
+  const [copiedId, setCopiedId] = useState(null);
 
   const fetchCustomers = async () => {
     if (!organization?.id) return;
@@ -151,6 +166,46 @@ const Customers = () => {
     setOpenMenuId(null);
   };
 
+  const handleCopyPortalLink = (customer) => {
+    const origin = window.location.origin;
+    // If customer has auth, send to login; otherwise send to join page
+    const link = customer.auth_user_id
+      ? `${origin}/client/login`
+      : `${origin}/join/${organization?.slug || ''}`;
+
+    navigator.clipboard.writeText(link).then(() => {
+      setCopiedId(customer.id);
+      setTimeout(() => setCopiedId(null), 2000);
+    });
+    setOpenMenuId(null);
+  };
+
+  const handleAddToGoogleWallet = async (customer) => {
+    if (walletLoadingId || !customer.card_id) return;
+
+    setWalletLoadingId(customer.id);
+    setOpenMenuId(null);
+
+    try {
+      const result = await generateGooglePass(customer.card_id);
+
+      if (result.success && result.saveUrl) {
+        openGoogleWalletSave(result.saveUrl);
+      } else {
+        alert('Error al generar pase: ' + (result.error || 'Error desconocido'));
+      }
+    } catch (err) {
+      alert('Error de conexión');
+    } finally {
+      setWalletLoadingId(null);
+    }
+  };
+
+  const handleViewProfile = (customer) => {
+    setOpenMenuId(null);
+    navigate(`/dashboard/clients/${customer.card_id}`);
+  };
+
   return (
     <Container>
       <PageHeader>
@@ -214,12 +269,15 @@ const Customers = () => {
                 return (
                   <Tr key={customer.id}>
                     <Td>
-                      <CustomerInfo>
+                      <CustomerInfo
+                        onClick={() => handleViewProfile(customer)}
+                        style={{ cursor: 'pointer' }}
+                      >
                         <CustomerAvatar>
                           {(customer.full_name || customer.email)?.charAt(0).toUpperCase()}
                         </CustomerAvatar>
                         <CustomerDetails>
-                          <CustomerName>
+                          <CustomerName $clickable>
                             {customer.full_name || 'Sin nombre'}
                           </CustomerName>
                           <CustomerContact>
@@ -289,6 +347,27 @@ const Customers = () => {
 
                           {openMenuId === customer.id && (
                             <MenuDropdown>
+                              <MenuItem onClick={() => handleViewProfile(customer)}>
+                                <User size={14} />
+                                Ver Perfil
+                              </MenuItem>
+                              <MenuItem onClick={() => handleCopyPortalLink(customer)}>
+                                {copiedId === customer.id ? (
+                                  <Check size={14} style={{ color: '#10B981' }} />
+                                ) : (
+                                  <Copy size={14} />
+                                )}
+                                {copiedId === customer.id ? 'Copiado!' : 'Copiar Link'}
+                              </MenuItem>
+                              <MenuItem onClick={() => handleAddToGoogleWallet(customer)}>
+                                {walletLoadingId === customer.id ? (
+                                  <Loader2 size={14} className="spin" />
+                                ) : (
+                                  <Smartphone size={14} />
+                                )}
+                                Google Wallet
+                              </MenuItem>
+                              <MenuDivider />
                               <MenuItem
                                 $danger
                                 onClick={() => handleDeleteCustomer(customer.id)}
@@ -554,6 +633,12 @@ const CustomerDetails = styled.div``;
 
 const CustomerName = styled.div`
   font-weight: ${({ theme }) => theme.fontWeights.medium};
+  ${({ $clickable }) => $clickable && `
+    &:hover {
+      color: ${({ theme }) => theme.colors?.primary || '#9787F3'};
+      text-decoration: underline;
+    }
+  `}
 `;
 
 const CustomerContact = styled.div`
@@ -673,6 +758,11 @@ const MenuDropdown = styled.div`
   z-index: 10;
 `;
 
+const spin = keyframes`
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+`;
+
 const MenuItem = styled.button`
   display: flex;
   align-items: center;
@@ -683,10 +773,20 @@ const MenuItem = styled.button`
   color: ${({ $danger, theme }) =>
     $danger ? theme.colors.error : theme.colors.text.secondary};
 
+  .spin {
+    animation: ${spin} 1s linear infinite;
+  }
+
   &:hover {
     background: ${({ $danger, theme }) =>
       $danger ? `${theme.colors.error}10` : theme.colors.surfaceHover};
   }
+`;
+
+const MenuDivider = styled.div`
+  height: 1px;
+  background: ${({ theme }) => theme.colors.border};
+  margin: ${({ theme }) => theme.space.xs} 0;
 `;
 
 // Modal Styles

@@ -70,6 +70,7 @@ const CardPreviewGoogle = ({
   activeFocusField = null,
   backSideConfig = {},
   isApple = false,
+  stripRef = null,
 }) => {
   // Rules
   const target = logicRules.target_stamps || logicRules.target || 8;
@@ -191,10 +192,11 @@ const CardPreviewGoogle = ({
                 {/* BOTTOM HALF: The Strip (Stamps) */}
                 <BottomSection $isApple={isApple}>
                   <StripCanvas
+                    ref={stripRef}
                     brandingConfig={designConfig}
                     rulesConfig={logicRules}
                     currentProgress={currentProgress}
-                    scale={1} // Full width of container
+                    scale={1}
                   />
                 </BottomSection>
 

@@ -28,6 +28,47 @@ export const AuthProvider = ({ children }) => {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Helpers de rol
+  const getUserRole = () => user?.user_metadata?.role || 'business';
+  const isClient = () => getUserRole() === 'client';
+  const isBusiness = () => getUserRole() !== 'client';
+
+  // Registro de cliente final (desde JoinPage)
+  const signUpClient = async ({ email, password, fullName }) => {
+    try {
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { role: 'client', full_name: fullName },
+        },
+      });
+
+      if (authError) throw authError;
+
+      const userId = authData.user.id;
+
+      // Buscar si ya existe client por email
+      const { data: existingClient } = await supabase
+        .from('clients')
+        .select('id')
+        .ilike('email', email)
+        .single();
+
+      if (existingClient) {
+        // Linkear auth_user_id al client existente
+        await supabase
+          .from('clients')
+          .update({ auth_user_id: userId })
+          .eq('id', existingClient.id);
+      }
+
+      return { data: authData, error: null };
+    } catch (error) {
+      return { data: null, error };
+    }
+  };
+
   // Registro de nuevo usuario + negocio
   const signUp = async ({ email, password, fullName, businessName }) => {
     try {
@@ -113,10 +154,14 @@ export const AuthProvider = ({ children }) => {
     session,
     loading,
     signUp,
+    signUpClient,
     signIn,
     signOut,
     resetPassword,
     isAuthenticated: !!user,
+    getUserRole,
+    isClient,
+    isBusiness,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

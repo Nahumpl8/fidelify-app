@@ -59,6 +59,7 @@ const CardPreviewApple = ({
   isFlipped = false,
   activeFocusField = null,
   backSideConfig = {},
+  stripRef = null,
 }) => {
   const isIdentity = programType === 'identity' || designConfig.template_mode === 'identity';
   const totalStamps = parseInt(logicRules.target_stamps || 8);
@@ -211,6 +212,7 @@ const CardPreviewApple = ({
             <>
               <StripContainer style={{ opacity: getOpacity('strip') }}>
                 <StripCanvas
+                  ref={stripRef}
                   brandingConfig={designConfig}
                   rulesConfig={logicRules}
                   currentProgress={currentProgress}

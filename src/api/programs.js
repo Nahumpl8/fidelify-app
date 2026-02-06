@@ -128,21 +128,67 @@ export const createProgram = async (programData) => {
     back_side_config,
   } = programData;
 
+  // Map frontend types to valid DB enum values: 'seals' | 'points' | 'levels' | 'cashback'
+  const dbTypeMap = { stamp: 'seals', mixed: 'seals', identity: 'seals' };
+  const dbType = dbTypeMap[type] || type;
+
   const businessUpdate = {
     name: name || undefined,
-    program_type: type,
+    program_type: dbType,
     is_active: is_active ?? true,
     target_value: rules_config?.target_stamps || rules_config?.target_value || 10,
     reward_text: rules_config?.reward_name || 'Recompensa',
-    logo_url: branding_config?.logo_url,
-    icon_url: branding_config?.icon_url,
-    strip_image_url: branding_config?.strip_image_url,
-    brand_color: branding_config?.primary_color || branding_config?.brand_color,
-    background_color: branding_config?.background_color,
-    label_color: branding_config?.label_color,
     program_config: rules_config,
     back_fields: back_side_config,
   };
+
+  // Helper to check if URL is base64 (won't work with Google Wallet)
+  const isBase64 = (url) => url?.startsWith('data:');
+
+  // Only include branding fields if they have actual values (not null/undefined)
+  // This prevents overwriting existing branding with null when wizard doesn't have images
+  if (branding_config?.logo_url) {
+    if (isBase64(branding_config.logo_url)) {
+      console.warn('⚠️ Logo is base64 - will not work with Google Wallet. Please re-upload.');
+    }
+    businessUpdate.logo_url = branding_config.logo_url;
+  }
+  if (branding_config?.icon_url) {
+    businessUpdate.icon_url = branding_config.icon_url;
+  }
+  if (branding_config?.strip_image_url) {
+    if (isBase64(branding_config.strip_image_url)) {
+      console.warn('⚠️ Strip image is base64 - skipping save (incompatible with Google Wallet)');
+    } else {
+      businessUpdate.strip_image_url = branding_config.strip_image_url;
+    }
+  }
+  if (branding_config?.hero_image_url) {
+    if (isBase64(branding_config.hero_image_url)) {
+      console.warn('⚠️ Hero image is base64 - skipping save (incompatible with Google Wallet)');
+    } else {
+      businessUpdate.hero_image_url = branding_config.hero_image_url;
+    }
+  }
+  // Colors should always be included if they exist (they have defaults)
+  if (branding_config?.primary_color || branding_config?.brand_color) {
+    businessUpdate.brand_color = branding_config.primary_color || branding_config.brand_color;
+  }
+  if (branding_config?.background_color) {
+    businessUpdate.background_color = branding_config.background_color;
+  }
+  if (branding_config?.label_color) {
+    businessUpdate.label_color = branding_config.label_color;
+  }
+
+  console.log('📝 Saving program to database:', {
+    organization_id,
+    name: businessUpdate.name,
+    background_color: businessUpdate.background_color,
+    brand_color: businessUpdate.brand_color,
+    logo_url: businessUpdate.logo_url ? (isBase64(businessUpdate.logo_url) ? 'BASE64' : businessUpdate.logo_url.substring(0, 50) + '...') : 'NOT SET',
+    strip_image_url: businessUpdate.strip_image_url ? (isBase64(businessUpdate.strip_image_url) ? 'BASE64' : businessUpdate.strip_image_url.substring(0, 50) + '...') : 'NOT SET',
+  });
 
   // Limpiar undefined
   Object.keys(businessUpdate).forEach(key => {

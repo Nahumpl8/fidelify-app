@@ -3,6 +3,7 @@ import { useOrganization } from '../context/OrganizationContext';
 import { createProgram, updateProgram, getProgram } from '../api/programs';
 import { supabase } from '../lib/supabase';
 import { INDUSTRY_TEMPLATES } from '../components/card-wizard/steps/Step1Template';
+import { generateAndUploadStripImage, isValidImageUrl } from '../utils/generateStripImage';
 
 /**
  * Program types supported by the wizard
@@ -668,13 +669,37 @@ export function useProgramForm(programId = null) {
 
     setIsSubmitting(true);
     try {
+      // Auto-generate strip/hero image if missing or base64
+      let brandingWithImage = { ...formState.branding_config };
+      const hasValidStrip = isValidImageUrl(brandingWithImage.strip_image_url);
+      const hasValidHero = isValidImageUrl(brandingWithImage.hero_image_url);
+
+      if (!hasValidStrip && !hasValidHero) {
+        console.log('🎨 Auto-generating strip image for Google Wallet...');
+        const generatedUrl = await generateAndUploadStripImage({
+          businessName: formState.name || 'Mi Negocio',
+          bgColor: brandingWithImage.background_color || '#4CAF50',
+          textColor: brandingWithImage.text_color || brandingWithImage.label_color || '#FFFFFF',
+          current: 0,
+          total: formState.rules_config?.target_stamps || 10,
+          rewardText: formState.rules_config?.reward_name || 'Recompensa',
+          programType: formState.type || 'stamp',
+        }, organization.id);
+
+        if (generatedUrl) {
+          brandingWithImage.strip_image_url = generatedUrl;
+          brandingWithImage.hero_image_url = generatedUrl;
+          console.log('✅ Strip image generated and uploaded:', generatedUrl);
+        }
+      }
+
       const programData = {
         organization_id: organization.id,
         name: formState.name,
         description: formState.description,
         type: formState.type,
         is_active: formState.is_active,
-        branding_config: formState.branding_config,
+        branding_config: brandingWithImage,
         rules_config: formState.rules_config,
         back_side_config: formState.back_side_config,
         data_collection_config: formState.data_collection_config,

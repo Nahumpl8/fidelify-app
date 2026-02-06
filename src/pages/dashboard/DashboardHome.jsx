@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled, { keyframes } from 'styled-components';
 import {
@@ -14,9 +14,15 @@ import {
   Sparkles,
   ArrowUpRight,
   Zap,
+  Copy,
+  Check,
+  Download,
+  X,
+  Share2,
 } from 'lucide-react';
 import { useOrganization } from '../../context/OrganizationContext';
 import { getDashboardStats } from '../../api/stats';
+import SmartCode from '../../components/ui/SmartCode';
 
 /**
  * DashboardHome
@@ -29,6 +35,56 @@ const DashboardHome = () => {
   const { organization } = useOrganization();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showQRModal, setShowQRModal] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const qrRef = useRef(null);
+
+  const joinUrl = `${window.location.origin}/join/${organization?.slug || ''}`;
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(joinUrl).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  const handleDownloadQR = () => {
+    const svg = qrRef.current?.querySelector('svg');
+    if (!svg) return;
+
+    const svgData = new XMLSerializer().serializeToString(svg);
+    const canvas = document.createElement('canvas');
+    canvas.width = 1024;
+    canvas.height = 1024;
+    const ctx = canvas.getContext('2d');
+
+    // White background
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, 1024, 1024);
+
+    const img = new Image();
+    img.onload = () => {
+      // Draw QR centered with padding
+      const padding = 80;
+      ctx.drawImage(img, padding, padding, 1024 - padding * 2, 1024 - padding * 2);
+
+      // Add business name at bottom
+      ctx.fillStyle = '#2D274B';
+      ctx.font = 'bold 36px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(organization?.name || 'Mi Negocio', 512, 1000);
+
+      canvas.toBlob((blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `qr-${organization?.slug || 'fidelify'}.png`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }, 'image/png');
+    };
+    img.src = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(svgData)))}`;
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -115,6 +171,12 @@ const DashboardHome = () => {
       icon: BarChart3,
       href: '/dashboard/overview',
     },
+    {
+      id: 'share-qr',
+      label: 'Compartir QR',
+      icon: Share2,
+      onClick: () => setShowQRModal(true),
+    },
   ];
 
   if (loading) {
@@ -182,7 +244,12 @@ const DashboardHome = () => {
           </SectionLabel>
           <QuickActionsGrid>
             {quickActions.map((action) => (
-              <QuickActionButton key={action.id} href={action.href}>
+              <QuickActionButton
+                key={action.id}
+                as={action.onClick ? 'button' : 'a'}
+                href={action.href}
+                onClick={action.onClick}
+              >
                 <QuickActionIcon>
                   <action.icon size={24} />
                 </QuickActionIcon>
@@ -205,11 +272,52 @@ const DashboardHome = () => {
               Tu programa de lealtad está activo. Comparte tu QR para conseguir tu primer cliente.
             </EmptyStateDescription>
           </EmptyStateContent>
-          <EmptyStateAction>
+          <EmptyStateAction onClick={() => setShowQRModal(true)}>
             <QrCode size={18} />
             Ver mi QR
           </EmptyStateAction>
         </EmptyStateCard>
+      )}
+
+      {/* QR Modal */}
+      {showQRModal && (
+        <ModalOverlay onClick={() => setShowQRModal(false)}>
+          <ModalCard onClick={(e) => e.stopPropagation()}>
+            <ModalClose onClick={() => setShowQRModal(false)}>
+              <X size={20} />
+            </ModalClose>
+
+            <ModalTitle>Comparte tu programa</ModalTitle>
+            <ModalSubtitle>
+              Tus clientes escanean este QR para registrarse en tu programa de lealtad
+            </ModalSubtitle>
+
+            <QRContainer ref={qrRef}>
+              <SmartCode
+                value={joinUrl}
+                size={200}
+                fgColor="#2D274B"
+                bgColor="transparent"
+                level="H"
+              />
+            </QRContainer>
+
+            <JoinUrlBox>
+              <JoinUrlText>{joinUrl}</JoinUrlText>
+            </JoinUrlBox>
+
+            <ModalActions>
+              <ModalButton onClick={handleCopyLink}>
+                {copied ? <Check size={16} /> : <Copy size={16} />}
+                {copied ? 'Copiado!' : 'Copiar link'}
+              </ModalButton>
+              <ModalButton $primary onClick={handleDownloadQR}>
+                <Download size={16} />
+                Descargar QR
+              </ModalButton>
+            </ModalActions>
+          </ModalCard>
+        </ModalOverlay>
       )}
     </PageContainer>
   );
@@ -652,6 +760,159 @@ const EmptyStateAction = styled.button`
   &:hover {
     background: rgba(151, 135, 243, 0.2);
     border-color: #9787F3;
+  }
+`;
+
+// QR Modal
+const ModalOverlay = styled.div`
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: ${fadeInUp} 0.2s ease-out;
+`;
+
+const ModalCard = styled.div`
+  position: relative;
+  background: ${({ theme }) =>
+    theme.mode === 'dark'
+      ? 'rgba(45, 39, 75, 0.95)'
+      : 'rgba(255, 255, 255, 0.98)'
+  };
+  backdrop-filter: blur(20px);
+  border: 1px solid ${({ theme }) =>
+    theme.mode === 'dark'
+      ? 'rgba(151, 135, 243, 0.25)'
+      : 'rgba(151, 135, 243, 0.2)'
+  };
+  border-radius: 28px;
+  padding: 40px 32px;
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.3);
+`;
+
+const ModalClose = styled.button`
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: ${({ theme }) =>
+    theme.mode === 'dark'
+      ? 'rgba(151, 135, 243, 0.15)'
+      : 'rgba(0, 0, 0, 0.05)'
+  };
+  border: none;
+  border-radius: 10px;
+  color: ${({ theme }) => theme.colors.text.secondary};
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background: rgba(151, 135, 243, 0.2);
+    color: ${({ theme }) => theme.colors.text.primary};
+  }
+`;
+
+const ModalTitle = styled.h2`
+  font-size: 22px;
+  font-weight: 700;
+  color: ${({ theme }) => theme.colors.text.primary};
+  margin: 0 0 8px 0;
+`;
+
+const ModalSubtitle = styled.p`
+  font-size: 14px;
+  color: ${({ theme }) => theme.colors.text.secondary};
+  margin: 0 0 28px 0;
+  line-height: 1.4;
+`;
+
+const QRContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  margin: 0 auto 20px;
+  max-width: 248px;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 4px 16px rgba(151, 135, 243, 0.1);
+`;
+
+const JoinUrlBox = styled.div`
+  background: ${({ theme }) =>
+    theme.mode === 'dark'
+      ? 'rgba(151, 135, 243, 0.1)'
+      : 'rgba(151, 135, 243, 0.06)'
+  };
+  border: 1px solid rgba(151, 135, 243, 0.2);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+`;
+
+const JoinUrlText = styled.p`
+  font-size: 13px;
+  font-family: monospace;
+  color: ${({ theme }) => theme.colors.text.secondary};
+  margin: 0;
+  word-break: break-all;
+`;
+
+const ModalActions = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+`;
+
+const ModalButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  ${({ $primary, theme }) => $primary
+    ? `
+      background: linear-gradient(135deg, #9787F3 0%, #7C6AE8 100%);
+      color: white;
+      border: none;
+      box-shadow: 0 4px 12px rgba(151, 135, 243, 0.4);
+
+      &:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(151, 135, 243, 0.5);
+      }
+    `
+    : `
+      background: ${theme.mode === 'dark'
+        ? 'rgba(151, 135, 243, 0.12)'
+        : 'rgba(151, 135, 243, 0.08)'
+      };
+      color: #9787F3;
+      border: 1px solid rgba(151, 135, 243, 0.3);
+
+      &:hover {
+        background: rgba(151, 135, 243, 0.2);
+        border-color: #9787F3;
+      }
+    `
   }
 `;
 
