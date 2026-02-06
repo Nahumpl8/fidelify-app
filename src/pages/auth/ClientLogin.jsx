@@ -30,6 +30,8 @@ const ClientLogin = () => {
       if (authError) {
         if (authError.message.includes('Invalid login credentials')) {
           setError('Email o contraseña incorrectos');
+        } else if (authError.message.includes('Email not confirmed')) {
+          setError('Tu email aún no está confirmado. Revisa tu bandeja de entrada.');
         } else {
           setError(authError.message);
         }

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 import { supabase } from '../../lib/supabase';
 import {
   generateApplePass,
@@ -10,17 +10,7 @@ import {
   supportsAppleWallet,
   supportsGoogleWallet,
 } from '../../services/wallet';
-
-/**
- * JoinPage - Registro público de clientes en un negocio específico
- * URL: /join/:slug (ej: /join/ray-myon)
- *
- * Flujo:
- * 1. Obtiene el negocio por slug
- * 2. Muestra formulario con branding del negocio
- * 3. Crea client + loyalty_card
- * 4. Redirige a página de éxito/wallet
- */
+import { User, Mail, Phone, Calendar, Lock, ArrowRight, CheckCircle, Gift } from 'lucide-react';
 
 const JoinPage = () => {
   const { slug } = useParams();
@@ -43,6 +33,7 @@ const JoinPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [cardData, setCardData] = useState(null);
+  const [pendingConfirmation, setPendingConfirmation] = useState(false);
 
   // Estado de wallet
   const [walletLoading, setWalletLoading] = useState({ apple: false, google: false });
@@ -82,6 +73,7 @@ const JoinPage = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    if (error) setError(null);
   };
 
   // Enviar formulario
@@ -112,6 +104,7 @@ const JoinPage = () => {
             role: 'client',
             full_name: formData.full_name,
           },
+          emailRedirectTo: `${window.location.origin}/portal`,
         },
       });
 
@@ -122,6 +115,13 @@ const JoinPage = () => {
           return;
         }
         throw authError;
+      }
+
+      // Si no hay sesión, email confirmation está activada
+      if (!authData.session) {
+        setPendingConfirmation(true);
+        setSubmitting(false);
+        return;
       }
 
       const userId = authData.user.id;
@@ -247,7 +247,7 @@ const JoinPage = () => {
   if (loading) {
     return (
       <Container>
-        <LoadingMessage>Cargando...</LoadingMessage>
+        <Spinner />
       </Container>
     );
   }
@@ -256,11 +256,42 @@ const JoinPage = () => {
   if (error && !business) {
     return (
       <Container>
-        <ErrorCard>
-          <h2>Negocio no encontrado</h2>
-          <p>El link que usaste no es válido o el negocio ya no está activo.</p>
-          <BackButton onClick={() => navigate('/')}>Ir al inicio</BackButton>
-        </ErrorCard>
+        <Card>
+          <ErrorIconWrapper>
+            <Gift size={36} />
+          </ErrorIconWrapper>
+          <Title>Negocio no encontrado</Title>
+          <SubtitleText>El link que usaste no es válido o el negocio ya no está activo.</SubtitleText>
+          <BackButton onClick={() => navigate('/')}>
+            Ir al inicio
+            <ArrowRight size={18} />
+          </BackButton>
+        </Card>
+      </Container>
+    );
+  }
+
+  // Pending email confirmation state
+  if (pendingConfirmation) {
+    return (
+      <Container>
+        <Card>
+          {business?.logo_url && (
+            <Logo src={business.logo_url} alt={business.name} />
+          )}
+          <ConfirmIconWrapper>
+            <Mail size={36} />
+          </ConfirmIconWrapper>
+          <Title>Revisa tu email</Title>
+          <SubtitleText>
+            Enviamos un link de confirmación a <strong>{formData.email}</strong>.
+            Haz clic en el link para activar tu cuenta y acceder a tu tarjeta de lealtad.
+          </SubtitleText>
+          <LoginLinkButton to="/client/login">
+            Ya confirmé, iniciar sesión
+            <ArrowRight size={18} />
+          </LoginLinkButton>
+        </Card>
       </Container>
     );
   }
@@ -268,31 +299,33 @@ const JoinPage = () => {
   // Success state
   if (success) {
     return (
-      <Container style={{ background: business?.background_color || '#4CAF50' }}>
-        <SuccessCard>
+      <Container>
+        <Card>
           {business?.logo_url && (
             <Logo src={business.logo_url} alt={business.name} />
           )}
-          <SuccessIcon>✓</SuccessIcon>
-          <h2>¡Bienvenido a {business?.name}!</h2>
-          <p>Tu tarjeta de lealtad ha sido creada.</p>
+          <SuccessIconWrapper>
+            <CheckCircle size={40} />
+          </SuccessIconWrapper>
+          <Title>¡Bienvenido a {business?.name}!</Title>
+          <SubtitleText>Tu tarjeta de lealtad ha sido creada.</SubtitleText>
 
           <CardInfo>
             <InfoRow>
-              <span>Programa:</span>
-              <strong>{business?.program_type === 'seals' ? 'Sellos' : 'Puntos'}</strong>
+              <InfoLabel>Programa</InfoLabel>
+              <InfoValue>{business?.program_type === 'seals' ? 'Sellos' : 'Puntos'}</InfoValue>
             </InfoRow>
             <InfoRow>
-              <span>Meta:</span>
-              <strong>{business?.target_value} {business?.program_type === 'seals' ? 'sellos' : 'puntos'}</strong>
+              <InfoLabel>Meta</InfoLabel>
+              <InfoValue>{business?.target_value} {business?.program_type === 'seals' ? 'sellos' : 'puntos'}</InfoValue>
             </InfoRow>
             <InfoRow>
-              <span>Premio:</span>
-              <strong>{business?.reward_text}</strong>
+              <InfoLabel>Premio</InfoLabel>
+              <InfoValue>{business?.reward_text}</InfoValue>
             </InfoRow>
           </CardInfo>
 
-          {walletError && <WalletErrorMessage>{walletError}</WalletErrorMessage>}
+          {walletError && <ErrorMessage>{walletError}</ErrorMessage>}
 
           {supportsAppleWallet() && (
             <WalletButton
@@ -302,62 +335,70 @@ const JoinPage = () => {
               {walletLoading.apple
                 ? 'Generando...'
                 : walletSuccess.apple
-                ? '✓ Descargado'
+                ? 'Descargado'
                 : 'Agregar a Apple Wallet'}
             </WalletButton>
           )}
 
-          <WalletButtonAlt
+          <WalletButtonGoogle
             onClick={handleAddToGoogleWallet}
             disabled={walletLoading.google || walletSuccess.google}
           >
             {walletLoading.google
               ? 'Generando...'
               : walletSuccess.google
-              ? '✓ Agregado'
+              ? 'Agregado'
               : 'Agregar a Google Wallet'}
-          </WalletButtonAlt>
+          </WalletButtonGoogle>
 
           <SkipLink onClick={() => navigate('/')}>
             Omitir por ahora
           </SkipLink>
-        </SuccessCard>
+        </Card>
       </Container>
     );
   }
 
   // Formulario de registro
   return (
-    <Container style={{ background: business?.background_color || '#f5f5f5' }}>
-      <FormCard>
-        {business?.logo_url && (
+    <Container>
+      <Card>
+        {business?.logo_url ? (
           <Logo src={business.logo_url} alt={business.name} />
+        ) : (
+          <LogoPlaceholder>
+            <Gift size={36} />
+          </LogoPlaceholder>
         )}
 
-        <Title style={{ color: business?.brand_color }}>
-          Únete a {business?.name}
-        </Title>
-
-        <Subtitle>
+        <Title>Únete a {business?.name}</Title>
+        <SubtitleText>
           Registra tus datos para comenzar a acumular{' '}
           {business?.program_type === 'seals' ? 'sellos' : 'puntos'} y obtener recompensas.
-        </Subtitle>
+        </SubtitleText>
+
+        {business?.reward_text && (
+          <RewardBadge>
+            <Gift size={16} />
+            {business.reward_text}
+          </RewardBadge>
+        )}
 
         <Form onSubmit={handleSubmit}>
           <InputGroup>
-            <Label>Nombre completo *</Label>
+            <InputIcon><User size={20} /></InputIcon>
             <Input
               type="text"
               name="full_name"
               value={formData.full_name}
               onChange={handleChange}
               required
-              placeholder="Tu nombre"
+              placeholder="Nombre completo"
             />
           </InputGroup>
 
           <InputGroup>
-            <Label>Email *</Label>
+            <InputIcon><Mail size={20} /></InputIcon>
             <Input
               type="email"
               name="email"
@@ -368,75 +409,93 @@ const JoinPage = () => {
             />
           </InputGroup>
 
-          <InputGroup>
-            <Label>Teléfono</Label>
-            <Input
-              type="tel"
-              name="phone"
-              value={formData.phone}
-              onChange={handleChange}
-              placeholder="+52 123 456 7890"
-            />
-          </InputGroup>
+          <InputRow>
+            <InputGroup>
+              <InputIcon><Phone size={20} /></InputIcon>
+              <Input
+                type="tel"
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                placeholder="Teléfono"
+              />
+            </InputGroup>
+
+            <InputGroup>
+              <InputIcon><Calendar size={20} /></InputIcon>
+              <Input
+                type="date"
+                name="birthday"
+                value={formData.birthday}
+                onChange={handleChange}
+                placeholder="Cumpleaños"
+              />
+            </InputGroup>
+          </InputRow>
 
           <InputGroup>
-            <Label>Fecha de nacimiento</Label>
-            <Input
-              type="date"
-              name="birthday"
-              value={formData.birthday}
-              onChange={handleChange}
-            />
-          </InputGroup>
-
-          <InputGroup>
-            <Label>Contraseña *</Label>
+            <InputIcon><Lock size={20} /></InputIcon>
             <Input
               type="password"
               name="password"
               value={formData.password}
               onChange={handleChange}
               required
-              placeholder="Mínimo 6 caracteres"
+              placeholder="Contraseña (mín. 6 caracteres)"
               autoComplete="new-password"
             />
           </InputGroup>
 
           <InputGroup>
-            <Label>Confirmar contraseña *</Label>
+            <InputIcon><Lock size={20} /></InputIcon>
             <Input
               type="password"
               name="confirmPassword"
               value={formData.confirmPassword}
               onChange={handleChange}
               required
-              placeholder="Repite tu contraseña"
+              placeholder="Confirmar contraseña"
               autoComplete="new-password"
             />
           </InputGroup>
 
           {error && <ErrorMessage>{error}</ErrorMessage>}
 
-          <SubmitButton
-            type="submit"
-            disabled={submitting}
-            style={{ background: business?.brand_color }}
-          >
+          <SubmitButton type="submit" disabled={submitting}>
             {submitting ? 'Registrando...' : 'Unirme al programa'}
+            {!submitting && <ArrowRight size={18} />}
           </SubmitButton>
         </Form>
 
-        <Terms>
+        <Divider />
+
+        <FooterText>
           ¿Ya tienes cuenta? <LoginLink to="/client/login">Inicia sesión aquí</LoginLink>
-        </Terms>
-        <Terms>
+        </FooterText>
+        <LegalText>
           Al registrarte aceptas recibir comunicaciones de {business?.name} sobre
           tu programa de lealtad.
-        </Terms>
-      </FormCard>
+        </LegalText>
+      </Card>
     </Container>
   );
 };
+
+// Animations
+const spin = keyframes`
+  to { transform: rotate(360deg); }
+`;
+
+const fadeInUp = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+`;
 
 // Styled Components
 const Container = styled.div`
@@ -445,181 +504,154 @@ const Container = styled.div`
   align-items: center;
   justify-content: center;
   padding: 20px;
-  transition: background 0.3s;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 `;
 
-const FormCard = styled.div`
+const Card = styled.div`
   background: white;
-  border-radius: 16px;
-  padding: 40px;
+  border-radius: 24px;
+  padding: 40px 28px;
   max-width: 420px;
   width: 100%;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: ${fadeInUp} 0.4s ease-out;
 `;
 
-const SuccessCard = styled(FormCard)`
-  text-align: center;
-`;
-
-const ErrorCard = styled(FormCard)`
-  text-align: center;
+const Spinner = styled.div`
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: ${spin} 0.6s linear infinite;
 `;
 
 const Logo = styled.img`
-  width: 80px;
-  height: 80px;
+  width: 96px;
+  height: 96px;
   object-fit: contain;
   margin: 0 auto 20px;
   display: block;
+  border-radius: 20px;
+`;
+
+const LogoPlaceholder = styled.div`
+  width: 72px;
+  height: 72px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  color: white;
 `;
 
 const Title = styled.h1`
   font-size: 24px;
   font-weight: 700;
-  margin-bottom: 8px;
+  margin: 0 0 8px 0;
   text-align: center;
+  color: #1a202c;
 `;
 
-const Subtitle = styled.p`
-  color: #666;
+const SubtitleText = styled.p`
+  color: #718096;
   text-align: center;
-  margin-bottom: 24px;
+  margin: 0 0 20px 0;
+  font-size: 15px;
+  line-height: 1.5;
+`;
+
+const RewardBadge = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #f6e05e 0%, #ed8936 100%);
+  color: #744210;
   font-size: 14px;
+  font-weight: 600;
+  padding: 10px 16px;
+  border-radius: 12px;
+  margin-bottom: 24px;
 `;
 
 const Form = styled.form`
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
+`;
+
+const InputRow = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
 `;
 
 const InputGroup = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  position: relative;
 `;
 
-const Label = styled.label`
-  font-size: 14px;
-  font-weight: 500;
-  color: #333;
+const InputIcon = styled.div`
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #a0aec0;
+  pointer-events: none;
+  display: flex;
 `;
 
 const Input = styled.input`
-  padding: 12px 16px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  width: 100%;
+  padding: 14px 16px 14px 46px;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
   font-size: 16px;
   transition: border-color 0.2s;
+  box-sizing: border-box;
+  background: #f7fafc;
 
   &:focus {
     outline: none;
-    border-color: #4CAF50;
-  }
-`;
-
-const SubmitButton = styled.button`
-  padding: 14px;
-  border: none;
-  border-radius: 8px;
-  background: #4CAF50;
-  color: white;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: opacity 0.2s;
-  margin-top: 8px;
-
-  &:hover {
-    opacity: 0.9;
+    border-color: #667eea;
+    background: white;
   }
 
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
+  &::placeholder {
+    color: #a0aec0;
   }
 `;
 
 const ErrorMessage = styled.p`
-  color: #d32f2f;
+  color: #e53e3e;
   font-size: 14px;
-  background: #ffebee;
-  padding: 10px;
-  border-radius: 6px;
-`;
-
-const Terms = styled.p`
-  font-size: 12px;
-  color: #999;
+  background: #fff5f5;
+  padding: 12px;
+  border-radius: 10px;
+  margin: 0;
   text-align: center;
-  margin-top: 16px;
 `;
 
-const LoadingMessage = styled.p`
-  color: #666;
-  font-size: 18px;
-`;
-
-const BackButton = styled.button`
-  margin-top: 20px;
-  padding: 12px 24px;
-  border: none;
-  border-radius: 8px;
-  background: #333;
-  color: white;
-  cursor: pointer;
-`;
-
-const SuccessIcon = styled.div`
-  width: 60px;
-  height: 60px;
-  background: #4CAF50;
-  border-radius: 50%;
+const SubmitButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
-  font-size: 32px;
-  margin: 0 auto 20px;
-`;
-
-const CardInfo = styled.div`
-  background: #f5f5f5;
-  border-radius: 12px;
-  padding: 16px;
-  margin: 20px 0;
-`;
-
-const InfoRow = styled.div`
-  display: flex;
-  justify-content: space-between;
-  padding: 8px 0;
-  border-bottom: 1px solid #e0e0e0;
-
-  &:last-child {
-    border-bottom: none;
-  }
-
-  span {
-    color: #666;
-  }
-`;
-
-const WalletButton = styled.button`
-  width: 100%;
+  gap: 8px;
   padding: 14px;
-  border: none;
-  border-radius: 8px;
-  background: #000;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
+  border: none;
+  border-radius: 12px;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
-  margin-bottom: 10px;
-  transition: opacity 0.2s, background 0.2s;
+  transition: transform 0.2s, opacity 0.2s;
+  margin-top: 4px;
 
   &:hover:not(:disabled) {
-    opacity: 0.9;
+    transform: translateY(-1px);
   }
 
   &:disabled {
@@ -628,17 +660,25 @@ const WalletButton = styled.button`
   }
 `;
 
-const WalletButtonAlt = styled(WalletButton)`
-  background: #4285f4;
+const Divider = styled.div`
+  height: 1px;
+  background: #e2e8f0;
+  margin: 24px 0 16px;
 `;
 
-const WalletErrorMessage = styled.p`
-  color: #d32f2f;
+const FooterText = styled.p`
   font-size: 14px;
-  background: #ffebee;
-  padding: 10px;
-  border-radius: 6px;
-  margin-bottom: 12px;
+  color: #718096;
+  text-align: center;
+  margin: 0 0 8px 0;
+`;
+
+const LegalText = styled.p`
+  font-size: 12px;
+  color: #a0aec0;
+  text-align: center;
+  margin: 0;
+  line-height: 1.4;
 `;
 
 const LoginLink = styled(Link)`
@@ -651,17 +691,154 @@ const LoginLink = styled(Link)`
   }
 `;
 
+const LoginLinkButton = styled(Link)`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.2s;
+
+  &:hover {
+    transform: translateY(-1px);
+  }
+`;
+
+const BackButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0 auto;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s;
+
+  &:hover {
+    transform: translateY(-1px);
+  }
+`;
+
+const ErrorIconWrapper = styled.div`
+  width: 72px;
+  height: 72px;
+  background: #fff5f5;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  color: #e53e3e;
+`;
+
+const ConfirmIconWrapper = styled.div`
+  width: 72px;
+  height: 72px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  color: white;
+`;
+
+const SuccessIconWrapper = styled.div`
+  width: 72px;
+  height: 72px;
+  background: linear-gradient(135deg, #48bb78, #38a169);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  color: white;
+`;
+
+const CardInfo = styled.div`
+  background: #f7fafc;
+  border-radius: 14px;
+  padding: 4px 16px;
+  margin: 20px 0;
+  border: 1px solid #e2e8f0;
+`;
+
+const InfoRow = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #e2e8f0;
+
+  &:last-child {
+    border-bottom: none;
+  }
+`;
+
+const InfoLabel = styled.span`
+  color: #718096;
+  font-size: 14px;
+`;
+
+const InfoValue = styled.span`
+  color: #1a202c;
+  font-weight: 600;
+  font-size: 14px;
+`;
+
+const WalletButton = styled.button`
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  background: #1a202c;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 10px;
+  transition: transform 0.2s, opacity 0.2s;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+`;
+
+const WalletButtonGoogle = styled(WalletButton)`
+  background: #4285f4;
+`;
+
 const SkipLink = styled.button`
+  display: block;
   background: none;
   border: none;
-  color: #666;
+  color: #718096;
   font-size: 14px;
   cursor: pointer;
-  margin-top: 12px;
+  margin: 12px auto 0;
   text-decoration: underline;
 
   &:hover {
-    color: #333;
+    color: #4a5568;
   }
 `;
 

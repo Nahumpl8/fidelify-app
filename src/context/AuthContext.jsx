@@ -41,6 +41,7 @@ export const AuthProvider = ({ children }) => {
         password,
         options: {
           data: { role: 'client', full_name: fullName },
+          emailRedirectTo: `${window.location.origin}/portal`,
         },
       });
 
